@@ -21,6 +21,10 @@ python manage.py runserver
 No Windows, ative `.venv` e use o `python` desse ambiente antes de instalar as dependências.
 A aplicação disponibiliza `/admin/` e `/health/` nesta estrutura inicial.
 
+O protótipo navegável de baixa fidelidade está em
+[`docs/prototipo-baixa-fidelidade/index.html`](docs/prototipo-baixa-fidelidade/index.html).
+Abra o arquivo no navegador para revisar os fluxos antes da implementação.
+
 Para usar PostgreSQL, configure `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`,
 `POSTGRES_HOST` e `POSTGRES_PORT` no ambiente. Configure também `DJANGO_SECRET_KEY`
 antes de disponibilizar o sistema fora do ambiente local.
