@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}Resultado — planilha oficial — OTO{% endblock %}
+{% block cabecalho %}Importação oficial — {{ segmento }}{% endblock %}
+{% block nav_importacao %}ativo{% endblock %}
+{% block conteudo %}
+<div class="row g-3 mb-4">
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor text-success">{{ resumo.criados }}</span><span class="rotulo">Criados</span></div></div></div>
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor">{{ resumo.atualizados }}</span><span class="rotulo">Atualizados</span></div></div></div>
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor text-muted">{{ resumo.ignorados }}</span><span class="rotulo">Ignorados</span></div></div></div>
+</div>
+<div class="card mb-3">
+  <div class="card-header"><i class="bi bi-list-check"></i> Itens processados ({{ registros|length }})</div>
+  <div class="table-responsive"><table class="table table-sm table-hover mb-0">
+    <thead><tr><th>Referência</th><th>Nome</th><th>Documento</th><th class="text-end">Contatos</th><th class="text-end">Campos específicos</th></tr></thead>
+    <tbody>
+      {% for r in registros %}
+      <tr><td>{{ r.referencia }}</td><td>{{ r.base.nome }}</td><td>{{ r.base.documento|default:"—" }}</td>
+        <td class="text-end">{{ r.contatos|length }}</td><td class="text-end">{{ r.campos_segmento|length }}</td></tr>
+      {% empty %}<tr><td colspan="5" class="text-muted">Nenhum item identificado.</td></tr>{% endfor %}
+    </tbody></table></div>
+</div>
+<div class="d-flex gap-2">
+  <a class="btn btn-primary" href="{% url 'importacao:importar_oficial' %}"><i class="bi bi-upload"></i> Importar outra aba</a>
+  <a class="btn btn-outline-primary" href="{% url 'inventario:lista' %}">Ver Inventário</a>
+</div>
+{% endblock %}

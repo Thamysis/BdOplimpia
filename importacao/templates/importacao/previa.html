@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block titulo %}Prévia da importação — OTO{% endblock %}
+{% block cabecalho %}Prévia da importação{% endblock %}
+{% block nav_importacao %}ativo{% endblock %}
+{% block conteudo %}
+<p class="text-muted">Arquivo: <strong>{{ nome_arquivo }}</strong>{% if fonte %} · Fonte: {{ fonte }}{% endif %}</p>
+
+<div class="row g-3 mb-4">
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor">{{ resultado.total_lidos }}</span><span class="rotulo">Lidos</span></div></div></div>
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor text-success">{{ resultado.total_aceitas }}</span><span class="rotulo">Serão importados</span></div></div></div>
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor text-danger">{{ resultado.total_rejeitadas }}</span><span class="rotulo">Serão rejeitados</span></div></div></div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header text-success"><i class="bi bi-check-circle"></i> Linhas aceitas</div>
+  <div class="table-responsive"><table class="table table-sm table-hover mb-0">
+    <thead><tr><th>Referência</th><th>Nome</th><th>Bairro</th><th>Documento</th></tr></thead>
+    <tbody>
+      {% for linha in resultado.aceitas %}
+      <tr><td>{{ linha.referencia }}</td><td>{{ linha.dados.nome }}</td><td>{{ linha.dados.bairro|default:"—" }}</td><td>{{ linha.dados.documento|default:"—" }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="text-muted">Nenhuma linha aceita.</td></tr>{% endfor %}
+    </tbody></table></div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header text-danger"><i class="bi bi-exclamation-triangle"></i> Linhas rejeitadas</div>
+  <div class="table-responsive"><table class="table table-sm table-hover mb-0">
+    <thead><tr><th>Referência</th><th>Nome</th><th>Tipo</th><th>Motivo</th></tr></thead>
+    <tbody>
+      {% for linha in resultado.rejeitadas %}
+      <tr><td>{{ linha.referencia }}</td><td>{{ linha.dados.nome|default:"—" }}</td>
+        <td><span class="badge text-bg-warning">{{ linha.tipo_display }}</span></td><td>{{ linha.motivo }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="text-muted">Nenhuma linha rejeitada.</td></tr>{% endfor %}
+    </tbody></table></div>
+</div>
+
+<div class="d-flex gap-2">
+  <form method="post" action="{% url 'importacao:confirmar' %}">{% csrf_token %}
+    <button type="submit" class="btn btn-primary" {% if resultado.total_aceitas == 0 %}disabled{% endif %}>
+      <i class="bi bi-check-lg"></i> Confirmar importação ({{ resultado.total_aceitas }})</button></form>
+  <form method="post" action="{% url 'importacao:cancelar' %}">{% csrf_token %}
+    <button type="submit" class="btn btn-outline-secondary">Cancelar</button></form>
+</div>
+{% endblock %}

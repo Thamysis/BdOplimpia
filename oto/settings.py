@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from django.contrib.messages import constants as messages
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "development-only-change-before-deploying")
@@ -14,7 +16,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Apps do OTO - Base de Dados Principal
+    "acesso",
+    "inventario",
+    "auditoria",
+    "importacao",
+    "ods",
 ]
+
+AUTH_USER_MODEL = "acesso.Usuario"
+LOGIN_URL = "acesso:login"
+LOGIN_REDIRECT_URL = "painel"
+LOGOUT_REDIRECT_URL = "acesso:login"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -30,7 +43,7 @@ ROOT_URLCONF = "oto.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -63,5 +76,15 @@ TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Mapeia os níveis de mensagem do Django para as classes de alerta do Bootstrap.
+MESSAGE_TAGS = {
+    messages.DEBUG: "secondary",
+    messages.INFO: "info",
+    messages.SUCCESS: "success",
+    messages.WARNING: "warning",
+    messages.ERROR: "danger",
+}
 

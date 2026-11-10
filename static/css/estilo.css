@@ -1,0 +1,192 @@
+/* ============================================================
+   OTO — camada de tema sobre o Bootstrap 5
+   Paleta institucional (turismo/Prefeitura): verde + âmbar.
+   ============================================================ */
+:root {
+  --oto-primaria: #0b6e4f;
+  --oto-primaria-escura: #084d37;
+  --oto-primaria-clara: #e7f3ee;
+  --oto-destaque: #f2a900;
+  --oto-sidebar-bg: #0c2a22;
+  --oto-sidebar-bg2: #0a3a2c;
+  --oto-texto: #1f2a28;
+  --oto-borda: #e3e9e6;
+  --oto-fundo: #f3f6f5;
+  --bs-primary: #0b6e4f;
+}
+
+body {
+  background: var(--oto-fundo);
+  color: var(--oto-texto);
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ---- Botões/links na cor da marca ---- */
+.btn-primary {
+  --bs-btn-bg: var(--oto-primaria);
+  --bs-btn-border-color: var(--oto-primaria);
+  --bs-btn-hover-bg: var(--oto-primaria-escura);
+  --bs-btn-hover-border-color: var(--oto-primaria-escura);
+  --bs-btn-active-bg: var(--oto-primaria-escura);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--oto-primaria);
+  --bs-btn-border-color: var(--oto-primaria);
+  --bs-btn-hover-bg: var(--oto-primaria);
+  --bs-btn-hover-border-color: var(--oto-primaria);
+}
+a { color: var(--oto-primaria); }
+.text-primary { color: var(--oto-primaria) !important; }
+
+/* ============================================================
+   Layout app (sidebar + conteúdo)
+   ============================================================ */
+.oto-app { display: flex; min-height: 100vh; }
+
+.oto-sidebar {
+  width: 256px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--oto-sidebar-bg), var(--oto-sidebar-bg2));
+  color: #cfe6dc;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.oto-brand {
+  display: flex; align-items: center; gap: .7rem;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.oto-brand i { font-size: 1.6rem; color: var(--oto-destaque); }
+.oto-brand strong { display: block; color: #fff; font-size: 1.05rem; line-height: 1.1; }
+.oto-brand span { font-size: .72rem; color: #9ec7b8; }
+
+.oto-nav { padding: .75rem .6rem; display: flex; flex-direction: column; gap: .15rem; flex: 1; }
+.oto-nav a {
+  display: flex; align-items: center; gap: .7rem;
+  padding: .6rem .8rem;
+  color: #cfe6dc;
+  text-decoration: none;
+  border-radius: 9px;
+  font-size: .94rem;
+  transition: background .15s, color .15s;
+}
+.oto-nav a i { font-size: 1.05rem; width: 1.2rem; text-align: center; }
+.oto-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+.oto-nav a.ativo { background: var(--oto-primaria); color: #fff; font-weight: 600; }
+
+.oto-sidebar-rodape {
+  padding: 1rem 1.25rem; font-size: .72rem; color: #78a596;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display: flex; flex-direction: column;
+}
+
+.oto-conteudo { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+.oto-topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--oto-borda);
+  padding: .7rem 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+  position: sticky; top: 0; z-index: 10;
+}
+.oto-topbar-titulo { font-weight: 700; font-size: 1.1rem; flex: 1; }
+
+.oto-perfil {
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--oto-primaria-clara); border: none; color: var(--oto-texto);
+}
+.oto-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--oto-primaria); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem;
+}
+.oto-badge-perfil { background: var(--oto-destaque); color: #3a2a00; font-weight: 600; }
+
+.oto-main { padding: 1.5rem; max-width: 1200px; width: 100%; }
+
+/* ---- Cartões e tabelas ---- */
+.card { border: 1px solid var(--oto-borda); border-radius: 12px; box-shadow: 0 1px 2px rgba(16,40,34,.04); }
+.card-header { background: #fff; border-bottom: 1px solid var(--oto-borda); font-weight: 600; }
+.table > :not(caption) > * > * { padding: .7rem .75rem; }
+.table thead th { background: #eef3f1; color: #3a4a45; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+
+/* ---- KPI / métricas ---- */
+.oto-kpi { display: flex; flex-direction: column; gap: .2rem; }
+.oto-kpi .valor { font-size: 2rem; font-weight: 800; color: var(--oto-primaria); line-height: 1; }
+.oto-kpi .rotulo { color: #5a6b66; font-size: .85rem; }
+.oto-kpi .icone {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--oto-primaria-clara); color: var(--oto-primaria);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem;
+}
+
+/* ---- Badges de status ---- */
+.badge-ativo { background: #d8f1df; color: #1b7f3b; }
+.badge-inativo { background: #f6dcda; color: #b3261e; }
+
+/* ---- Gráfico de barras (relatórios) ---- */
+.oto-barra-status { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid var(--oto-borda); }
+.oto-barra-status .ativo { background: var(--oto-primaria); }
+.oto-barra-status .inativo { background: #c0392b; }
+.oto-barra-status > div { color: #fff; font-size: .8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.oto-grafico th[scope=row] { font-weight: 600; white-space: nowrap; }
+.oto-grafico .trilha { background: #eef3f1; border-radius: 6px; height: 22px; position: relative; min-width: 60px; }
+.oto-grafico .barra { background: var(--oto-primaria); height: 100%; border-radius: 6px; min-width: 2px; }
+
+/* ---- Login ---- */
+.oto-login-wrap {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--oto-sidebar-bg), var(--oto-primaria));
+  padding: 1.5rem;
+}
+.oto-login-card { width: 100%; max-width: 400px; }
+.oto-login-card .oto-login-logo {
+  width: 60px; height: 60px; border-radius: 16px; background: var(--oto-primaria-clara);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--oto-primaria);
+}
+
+/* ---- Responsivo ---- */
+@media (max-width: 991.98px) {
+  .oto-sidebar {
+    position: fixed; z-index: 1050; left: -260px; transition: left .25s;
+    box-shadow: 0 0 40px rgba(0,0,0,.3);
+  }
+  .oto-sidebar.aberta { left: 0; }
+}
+
+/* ---- Compatibilidade: inputs legados com classe .campo recebem visual Bootstrap ---- */
+.campo,
+form select,
+form textarea,
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="number"],
+form input[type="date"],
+form input[type="file"] {
+  display: block;
+  width: 100%;
+  padding: .5rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--oto-texto);
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: .5rem;
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+.campo:focus,
+form select:focus,
+form textarea:focus,
+form input:focus {
+  border-color: var(--oto-primaria);
+  outline: 0;
+  box-shadow: 0 0 0 .2rem rgba(11,110,79,.18);
+}
+/* Checkboxes/radios não devem esticar */
+form input[type="checkbox"],
+form input[type="radio"] { width: auto; display: inline-block; }

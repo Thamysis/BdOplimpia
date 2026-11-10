@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Usuário — OTO{% endblock %}
+{% block cabecalho %}{% if form.instance.pk %}Editar usuário{% else %}Novo usuário{% endif %}{% endblock %}
+{% block nav_usuarios %}ativo{% endblock %}
+{% block conteudo %}
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="row">
+        {% for campo in form %}
+        <div class="col-md-6">{% include "_campo.html" with campo=campo %}</div>
+        {% endfor %}
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salvar</button>
+        <a class="btn btn-outline-secondary" href="{% url 'acesso:usuario_lista' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
