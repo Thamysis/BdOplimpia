@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Resultado — planilha oficial — OTO{% endblock %}
+{% block conteudo %}
+<h1>Importação oficial — {{ segmento }}</h1>
+
+<div class="resumo-importacao">
+  <div class="caixa"><div class="num">{{ resumo.criados }}</div>Itens criados</div>
+  <div class="caixa"><div class="num">{{ resumo.atualizados }}</div>Atualizados</div>
+  <div class="caixa"><div class="num">{{ resumo.ignorados }}</div>Ignorados</div>
+</div>
+
+<div class="cartao">
+  <h2>Itens processados ({{ registros|length }})</h2>
+  <table>
+    <thead><tr><th>Referência</th><th>Nome</th><th>Documento</th><th>Contatos</th><th>Campos específicos</th></tr></thead>
+    <tbody>
+      {% for r in registros %}
+      <tr>
+        <td>{{ r.referencia }}</td>
+        <td>{{ r.base.nome }}</td>
+        <td>{{ r.base.documento|default:"—" }}</td>
+        <td>{{ r.contatos|length }}</td>
+        <td>{{ r.campos_segmento|length }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">Nenhum item identificado no arquivo.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="acoes">
+  <a class="botao" href="{% url 'importacao:importar_oficial' %}">Importar outra aba</a>
+  <a class="botao secundario" href="{% url 'inventario:lista' %}">Ver Inventário</a>
+</div>
+{% endblock %}

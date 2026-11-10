@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block titulo %}Relatórios do Inventário — OTO{% endblock %}
+{% block conteudo %}
+<h1>Relatórios do Inventário</h1>
+
+<div class="grade-cartoes">
+  <div class="cartao"><div class="metric">{{ total }}</div>Itens no total</div>
+  <div class="cartao"><div class="metric">{{ ativos }}</div>Ativos</div>
+  <div class="cartao"><div class="metric">{{ inativos }}</div>Inativos</div>
+  <div class="cartao"><div class="metric">{{ por_segmento|length }}</div>Segmentos</div>
+</div>
+
+<div class="cartao">
+  <h2>Distribuição por status</h2>
+  {% if total %}
+  <div class="barra-status" role="img"
+       aria-label="{{ pct_ativos|floatformat:0 }}% ativos, {{ pct_inativos|floatformat:0 }}% inativos">
+    <div class="segmento-ativo" style="width: {{ pct_ativos|floatformat:2 }}%">
+      {% if pct_ativos >= 12 %}Ativos {{ pct_ativos|floatformat:0 }}%{% endif %}
+    </div>
+    <div class="segmento-inativo" style="width: {{ pct_inativos|floatformat:2 }}%">
+      {% if pct_inativos >= 12 %}Inativos {{ pct_inativos|floatformat:0 }}%{% endif %}
+    </div>
+  </div>
+  <p><span class="legenda ativo"></span> Ativos: {{ ativos }} &nbsp;
+     <span class="legenda inativo"></span> Inativos: {{ inativos }}</p>
+  {% else %}
+  <p>Sem itens cadastrados ainda.</p>
+  {% endif %}
+</div>
+
+<div class="cartao">
+  <h2>Itens por segmento</h2>
+  {% if por_segmento %}
+  <table class="grafico-barras">
+    <tbody>
+      {% for s in por_segmento %}
+      <tr>
+        <th scope="row">{{ s.nome }}</th>
+        <td class="barra-cel">
+          <div class="barra" style="width: {{ s.percentual|floatformat:2 }}%"
+               title="{{ s.total }} itens"></div>
+          <span class="valor">{{ s.total }} <small>({{ s.ativos }} ativos)</small></span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if sem_segmento %}
+  <p><small>{{ sem_segmento }} item(ns) sem segmento vinculado.</small></p>
+  {% endif %}
+  {% else %}
+  <p>Nenhum segmento cadastrado.</p>
+  {% endif %}
+</div>
+
+<a href="{% url 'inventario:lista' %}">&larr; Voltar à listagem</a>
+{% endblock %}

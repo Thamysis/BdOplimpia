@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Usuário — OTO{% endblock %}
+{% block conteudo %}
+<h1>{% if form.instance.pk %}Editar usuário{% else %}Novo usuário{% endif %}</h1>
+<div class="cartao">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for campo in form %}
+    <div class="linha-form">
+      <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+      {{ campo }}
+      {% if campo.help_text %}<small>{{ campo.help_text }}</small>{% endif %}
+      {% for erro in campo.errors %}<div class="erro">{{ erro }}</div>{% endfor %}
+    </div>
+    {% endfor %}
+    <div class="acoes">
+      <button type="submit">Salvar</button>
+      <a class="botao secundario" href="{% url 'acesso:usuario_lista' %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

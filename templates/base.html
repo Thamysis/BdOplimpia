@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}OTO — Base de Dados Principal{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/estilo.css' %}">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="{% url 'painel' %}">OTO · Base de Dados Principal</a>
+    {% if user.is_authenticated %}
+    <nav>
+      <a href="{% url 'inventario:lista' %}">Inventário</a>
+      <a href="{% url 'inventario:relatorios' %}">Relatórios</a>
+      {% if user.pode_importar %}<a href="{% url 'importacao:importar' %}">Importação</a>{% endif %}
+      {% if user.pode_consultar_indicadores %}<a href="{% url 'ods:indicador_lista' %}">ODS</a>{% endif %}
+      {% if user.pode_gerenciar_usuarios %}<a href="{% url 'acesso:usuario_lista' %}">Usuários</a>{% endif %}
+      <span class="usuario">{{ user.get_full_name|default:user.username }} · {{ user.get_perfil_display }}</span>
+      <a href="{% url 'acesso:logout' %}">Sair</a>
+    </nav>
+    {% endif %}
+  </header>
+  <main>
+    {% if messages %}
+    <ul class="mensagens">
+      {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% block conteudo %}{% endblock %}
+  </main>
+</body>
+</html>

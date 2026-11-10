@@ -30,7 +30,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Package reviewed source
-        run: tar -czf oto-source.tar.gz manage.py oto requirements.txt README.md
+        run: >
+          tar -czf oto-source.tar.gz
+          manage.py oto acesso inventario auditoria importacao ods
+          templates static requirements.txt README.md
       - uses: actions/upload-artifact@v4
         with:
           name: oto-source

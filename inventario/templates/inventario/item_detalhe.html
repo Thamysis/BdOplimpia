@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block titulo %}{{ item.nome }} — OTO{% endblock %}
+{% block conteudo %}
+<h1>{{ item.nome }}
+  {% if item.esta_ativo %}<span class="etiqueta ativo">Ativo</span>
+  {% else %}<span class="etiqueta inativo">Inativo</span>{% endif %}
+</h1>
+
+{% if user.pode_editar_inventario %}
+<div class="acoes">
+  <a class="botao" href="{% url 'inventario:editar' item.pk %}">Editar</a>
+  {% if item.esta_ativo %}
+  <form method="post" action="{% url 'inventario:inativar' item.pk %}" style="display:inline">
+    {% csrf_token %}<button class="botao perigo" type="submit">Inativar</button>
+  </form>
+  {% else %}
+  <form method="post" action="{% url 'inventario:reativar' item.pk %}" style="display:inline">
+    {% csrf_token %}<button class="botao" type="submit">Reativar</button>
+  </form>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="cartao">
+  <h2>Dados</h2>
+  <table>
+    <tr><th>Razão social</th><td>{{ item.razao_social|default:"—" }}</td></tr>
+    <tr><th>Documento</th><td>{{ item.tipo_documento }} {{ item.documento|default:"—" }}</td></tr>
+    <tr><th>Endereço</th><td>{{ item.endereco|default:"—" }}</td></tr>
+    <tr><th>Bairro</th><td>{{ item.bairro|default:"—" }}</td></tr>
+    <tr><th>Coordenadas</th><td>{{ item.latitude|default:"—" }}, {{ item.longitude|default:"—" }}</td></tr>
+    <tr><th>Segmentos</th><td>{% for s in segmentos_item %}{{ s.nome }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td></tr>
+  </table>
+</div>
+
+<div class="cartao">
+  <h2>Histórico de alterações</h2>
+  <table>
+    <thead><tr><th>Data/hora</th><th>Ação</th><th>Campo</th><th>Valor anterior</th><th>Valor novo</th><th>Usuário</th></tr></thead>
+    <tbody>
+      {% for h in historico %}
+      <tr>
+        <td>{{ h.data_hora|date:"d/m/Y H:i" }}</td>
+        <td>{{ h.get_acao_display }}</td>
+        <td>{{ h.campo_alterado|default:"—" }}</td>
+        <td>{{ h.valor_anterior|default:"—" }}</td>
+        <td>{{ h.valor_novo|default:"—" }}</td>
+        <td>{{ h.usuario|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">Sem alterações registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<a href="{% url 'inventario:lista' %}">&larr; Voltar à listagem</a>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block titulo %}Prévia da importação — OTO{% endblock %}
+{% block conteudo %}
+<h1>Prévia da importação</h1>
+<p>Arquivo: <strong>{{ nome_arquivo }}</strong>{% if fonte %} · Fonte: {{ fonte }}{% endif %}</p>
+
+<div class="resumo-importacao">
+  <div class="caixa"><div class="num">{{ resultado.total_lidos }}</div>Registros lidos</div>
+  <div class="caixa"><div class="num">{{ resultado.total_aceitas }}</div>Serão importados</div>
+  <div class="caixa"><div class="num">{{ resultado.total_rejeitadas }}</div>Serão rejeitados</div>
+</div>
+
+<div class="cartao">
+  <h2>Linhas aceitas</h2>
+  <table>
+    <thead><tr><th>Referência</th><th>Nome</th><th>Bairro</th><th>Documento</th></tr></thead>
+    <tbody>
+      {% for linha in resultado.aceitas %}
+      <tr>
+        <td>{{ linha.referencia }}</td>
+        <td>{{ linha.dados.nome }}</td>
+        <td>{{ linha.dados.bairro|default:"—" }}</td>
+        <td>{{ linha.dados.documento|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">Nenhuma linha aceita.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="cartao">
+  <h2>Linhas rejeitadas</h2>
+  <table>
+    <thead><tr><th>Referência</th><th>Nome</th><th>Tipo</th><th>Motivo</th></tr></thead>
+    <tbody>
+      {% for linha in resultado.rejeitadas %}
+      <tr>
+        <td>{{ linha.referencia }}</td>
+        <td>{{ linha.dados.nome|default:"—" }}</td>
+        <td>{{ linha.tipo_display }}</td>
+        <td>{{ linha.motivo }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">Nenhuma linha rejeitada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="acoes">
+  <form method="post" action="{% url 'importacao:confirmar' %}" style="display:inline">
+    {% csrf_token %}
+    <button type="submit" {% if resultado.total_aceitas == 0 %}disabled{% endif %}>
+      Confirmar importação ({{ resultado.total_aceitas }})
+    </button>
+  </form>
+  <form method="post" action="{% url 'importacao:cancelar' %}" style="display:inline">
+    {% csrf_token %}
+    <button type="submit" class="botao secundario">Cancelar</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Indicador ODS — OTO{% endblock %}
+{% block conteudo %}
+<h1>Novo indicador ODS</h1>
+<div class="cartao">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for campo in form %}
+    <div class="linha-form">
+      <label for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} *{% endif %}</label>
+      {{ campo }}
+      {% if campo.help_text %}<small>{{ campo.help_text }}</small>{% endif %}
+      {% for erro in campo.errors %}<div class="erro">{{ erro }}</div>{% endfor %}
+    </div>
+    {% endfor %}
+    <div class="acoes">
+      <button type="submit">Salvar</button>
+      <a class="botao secundario" href="{% url 'ods:indicador_lista' %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

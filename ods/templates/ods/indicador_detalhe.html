@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block titulo %}{{ indicador.nome }} — OTO{% endblock %}
+{% block conteudo %}
+<h1>{{ indicador.nome }}</h1>
+<div class="cartao">
+  <table>
+    <tr><th>Descrição</th><td>{{ indicador.descricao|default:"—" }}</td></tr>
+    <tr><th>Meta</th><td>{{ indicador.meta|default:"—" }}</td></tr>
+    <tr><th>Regra de cálculo</th><td>{{ indicador.get_regra_calculo_display }}</td></tr>
+    {% if indicador.regra_descricao %}<tr><th>Descrição da regra</th><td>{{ indicador.regra_descricao }}</td></tr>{% endif %}
+  </table>
+  <form method="post" action="{% url 'ods:calcular_medicao' indicador.pk %}">
+    {% csrf_token %}
+    <button type="submit">Calcular medição agora</button>
+  </form>
+</div>
+
+<div class="cartao">
+  <h2>Itens do Inventário vinculados</h2>
+  <ul>
+    {% for v in itens_vinculados %}<li>{{ v.item.nome }}</li>{% empty %}<li>Nenhum item vinculado.</li>{% endfor %}
+  </ul>
+</div>
+
+<div class="cartao">
+  <h2>Histórico de medições</h2>
+  <table>
+    <thead><tr><th>Período</th><th>Valor calculado</th><th>Calculado em</th></tr></thead>
+    <tbody>
+      {% for m in medicoes %}
+      <tr><td>{{ m.periodo|date:"d/m/Y" }}</td><td>{{ m.valor_calculado }}</td><td>{{ m.data_calculo|date:"d/m/Y H:i" }}</td></tr>
+      {% empty %}
+      <tr><td colspan="3">Sem medições registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="cartao">
+  <h2>Dados de pesquisa</h2>
+  <table>
+    <thead><tr><th>Data de referência</th><th>Valor</th><th>Origem</th></tr></thead>
+    <tbody>
+      {% for d in dados_pesquisa %}
+      <tr><td>{{ d.data_referencia|date:"d/m/Y" }}</td><td>{{ d.valor }}</td><td>{{ d.origem_pesquisa|default:"—" }}</td></tr>
+      {% empty %}
+      <tr><td colspan="3">Sem dados de pesquisa.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<a href="{% url 'ods:indicador_lista' %}">&larr; Voltar</a>
+{% endblock %}

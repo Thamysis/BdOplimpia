@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Histórico de importações — OTO{% endblock %}
+{% block conteudo %}
+<h1>Histórico de importações</h1>
+<div class="acoes"><a class="botao" href="{% url 'importacao:importar' %}">Nova importação</a></div>
+<div class="cartao">
+  <table>
+    <thead><tr><th>#</th><th>Arquivo</th><th>Status</th><th>Lidos</th><th>Importados</th><th>Rejeitados</th><th>Responsável</th><th>Data</th></tr></thead>
+    <tbody>
+      {% for imp in importacoes %}
+      <tr>
+        <td><a href="{% url 'importacao:detalhe' imp.pk %}">{{ imp.id }}</a></td>
+        <td>{{ imp.arquivo_origem|default:"—" }}</td>
+        <td>{{ imp.get_status_display }}</td>
+        <td>{{ imp.qtd_registros }}</td>
+        <td>{{ imp.qtd_importados }}</td>
+        <td>{{ imp.qtd_rejeitados }}</td>
+        <td>{{ imp.usuario|default:"—" }}</td>
+        <td>{{ imp.data_hora|date:"d/m/Y H:i" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8">Nenhuma importação registrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

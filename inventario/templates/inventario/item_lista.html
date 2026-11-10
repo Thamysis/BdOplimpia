@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block titulo %}Inventário — OTO{% endblock %}
+{% block conteudo %}
+<h1>Inventário Turístico</h1>
+
+<div class="acoes">
+  {% if user.pode_editar_inventario %}<a class="botao" href="{% url 'inventario:novo' %}">Cadastrar item</a>{% endif %}
+</div>
+
+<div class="cartao">
+  <form method="get" class="filtros">
+    <div>
+      <label for="nome">Nome</label>
+      <input type="text" id="nome" name="nome" value="{{ filtros.nome }}" placeholder="Buscar por nome">
+    </div>
+    <div>
+      <label for="segmento">Categoria/Segmento</label>
+      <select id="segmento" name="segmento">
+        <option value="">Todas</option>
+        {% for s in segmentos %}
+        <option value="{{ s.id }}" {% if filtros.segmento == s.id|stringformat:'s' %}selected{% endif %}>{{ s.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="">Todos (ativos)</option>
+        {% for valor, rotulo in status_choices %}
+        <option value="{{ valor }}" {% if filtros.status == valor %}selected{% endif %}>{{ rotulo }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label><input type="checkbox" name="incluir_inativos" value="1" {% if filtros.incluir_inativos %}checked{% endif %}> Incluir inativos</label>
+    </div>
+    <div class="acoes">
+      <button type="submit">Filtrar</button>
+      <a class="botao secundario" href="{% url 'inventario:lista' %}">Limpar</a>
+    </div>
+  </form>
+</div>
+
+<div class="cartao">
+  <table>
+    <thead><tr><th>Nome</th><th>Bairro</th><th>Documento</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for item in itens %}
+      <tr>
+        <td><a href="{% url 'inventario:detalhe' item.pk %}">{{ item.nome }}</a></td>
+        <td>{{ item.bairro|default:"—" }}</td>
+        <td>{{ item.documento|default:"—" }}</td>
+        <td>
+          {% if item.esta_ativo %}<span class="etiqueta ativo">Ativo</span>
+          {% else %}<span class="etiqueta inativo">Inativo</span>{% endif %}
+        </td>
+        <td><a class="botao pequeno secundario" href="{% url 'inventario:detalhe' item.pk %}">Ver</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">Nenhum item encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if is_paginated %}
+<div class="acoes">
+  {% if page_obj.has_previous %}<a class="botao secundario pequeno" href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="botao secundario pequeno" href="?page={{ page_obj.next_page_number }}">Próxima</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

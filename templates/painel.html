@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block titulo %}Painel — OTO{% endblock %}
+{% block conteudo %}
+<h1>Painel</h1>
+<div class="grade-cartoes">
+  <div class="cartao">
+    <div class="metric">{{ total_ativos }}</div>
+    <div>Itens ativos no Inventário</div>
+  </div>
+  <div class="cartao">
+    <div class="metric">{{ total_inativos }}</div>
+    <div>Itens inativos</div>
+  </div>
+  <div class="cartao">
+    <div class="metric">{{ total_indicadores }}</div>
+    <div>Indicadores ODS</div>
+  </div>
+</div>
+
+<div class="cartao">
+  <h2>Ações</h2>
+  <div class="acoes">
+    <a class="botao" href="{% url 'inventario:lista' %}">Consultar Inventário</a>
+    <a class="botao secundario" href="{% url 'inventario:relatorios' %}">Relatórios visuais</a>
+    {% if user.pode_editar_inventario %}<a class="botao" href="{% url 'inventario:novo' %}">Cadastrar item</a>{% endif %}
+    {% if user.pode_importar %}<a class="botao secundario" href="{% url 'importacao:importar' %}">Importar dados</a>{% endif %}
+    {% if user.pode_consultar_indicadores %}<a class="botao secundario" href="{% url 'ods:indicador_lista' %}">Indicadores ODS</a>{% endif %}
+  </div>
+</div>
+
+{% if ultimas_importacoes %}
+<div class="cartao">
+  <h2>Últimas importações</h2>
+  <table>
+    <thead><tr><th>#</th><th>Arquivo</th><th>Status</th><th>Lidos</th><th>Importados</th><th>Rejeitados</th><th>Data</th></tr></thead>
+    <tbody>
+      {% for imp in ultimas_importacoes %}
+      <tr>
+        <td>{{ imp.id }}</td>
+        <td>{{ imp.arquivo_origem|default:"—" }}</td>
+        <td>{{ imp.get_status_display }}</td>
+        <td>{{ imp.qtd_registros }}</td>
+        <td>{{ imp.qtd_importados }}</td>
+        <td>{{ imp.qtd_rejeitados }}</td>
+        <td>{{ imp.data_hora|date:"d/m/Y H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

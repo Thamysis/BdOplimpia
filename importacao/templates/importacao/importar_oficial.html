@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Importar planilha oficial — OTO{% endblock %}
+{% block conteudo %}
+<h1>Importar aba da planilha oficial</h1>
+<p>Para a planilha <strong>INVENTARIO OFICIAL OLIMPIA</strong>, exporte uma aba de
+categoria (ex.: Meios de Hospedagem) como CSV ou XLSX e envie aqui, informando o nome
+do segmento. O sistema detecta automaticamente a linha de cabeçalho, extrai os campos
+comuns (nome, razão social, documento, endereço, bairro, coordenadas), os contatos, o
+Cadastur e o CNAE, e registra as demais colunas como campos específicos do segmento.</p>
+
+<div class="cartao">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for campo in form %}
+    <div class="linha-form">
+      <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+      {{ campo }}
+      {% for erro in campo.errors %}<div class="erro">{{ erro }}</div>{% endfor %}
+    </div>
+    {% endfor %}
+    <div class="acoes">
+      <button type="submit">Importar aba</button>
+      <a class="botao secundario" href="{% url 'importacao:importar' %}">Importação genérica</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
