@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OTO | Protótipo de baixa fidelidade</title>
+  <style>
+    :root { --paper:#f3f3f1; --surface:#fff; --ink:#222; --muted:#626262; --line:#b7b7b3; --soft:#e8e8e5; --active:#dce5e8; --accent:#3f5964; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:15px/1.45 "Segoe UI",Arial,sans-serif; }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+    .login { min-height:100vh; display:grid; place-items:center; padding:24px; }
+    .login-card { width:min(100%,440px); background:var(--surface); border:2px solid var(--ink); padding:32px; box-shadow:8px 8px 0 var(--soft); }
+    .mark { display:inline-block; border:2px solid var(--ink); padding:3px 9px; font:700 19px/1 "Arial Narrow",Arial,sans-serif; letter-spacing:.04em; }
+    .eyebrow { margin:0 0 12px; font:700 11px/1.3 Consolas,monospace; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); }
+    h1,h2,h3 { font-family:"Arial Narrow","Segoe UI",Arial,sans-serif; letter-spacing:-.025em; line-height:1.1; }
+    h1 { font-size:34px; margin:18px 0 10px; }
+    h2 { font-size:30px; margin:0; }
+    h3 { font-size:19px; margin:0 0 10px; }
+    p { margin:0 0 12px; }
+    .muted { color:var(--muted); }
+    .small { font-size:12px; }
+    .field { display:grid; gap:5px; margin:15px 0; }
+    .field label { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+    .field input,.field select,.field textarea,.filters input,.filters select { width:100%; min-height:38px; border:1px solid #797979; background:#fff; padding:8px 10px; border-radius:0; }
+    textarea { min-height:78px; resize:vertical; }
+    .button { min-height:38px; border:1px solid var(--ink); background:#fff; color:var(--ink); padding:8px 14px; font-weight:700; text-align:center; }
+    .button:hover { background:var(--soft); }
+    .button.primary { background:var(--ink); color:#fff; }
+    .button.primary:hover { background:#454545; }
+    .button.ghost { border-color:var(--line); }
+    .button.danger { border-style:dashed; }
+    .button.link { border:0; padding:2px 0; min-height:auto; text-decoration:underline; font-weight:600; }
+    .row { display:flex; gap:9px; flex-wrap:wrap; align-items:center; }
+    .spread { display:flex; align-items:start; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+    .shell { min-height:100vh; display:grid; grid-template-columns:230px minmax(0,1fr); }
+    .rail { border-right:2px solid var(--ink); padding:22px 14px; background:#ececea; }
+    .rail .mark { margin:0 0 22px 7px; }
+    .rail-caption { margin:14px 8px 7px; color:var(--muted); font:700 10px Consolas,monospace; text-transform:uppercase; letter-spacing:.1em; }
+    .nav { display:grid; gap:4px; }
+    .nav button { width:100%; border:1px solid transparent; background:none; text-align:left; padding:9px 10px; font-weight:600; }
+    .nav button:hover,.nav button[aria-current="page"] { border-color:var(--ink); background:var(--active); }
+    .rail-foot { border-top:1px solid var(--line); margin-top:26px; padding:14px 8px 0; font-size:12px; }
+    main { min-width:0; }
+    .topbar { min-height:57px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 28px; background:#fafafa; }
+    .topbar .crumb { color:var(--muted); font:12px Consolas,monospace; }
+    .content { max-width:1220px; padding:30px 28px 70px; margin:auto; }
+    .screen { display:none; }
+    .screen.active { display:block; }
+    .screen-head { margin-bottom:24px; padding-bottom:20px; border-bottom:2px solid var(--ink); }
+    .screen-head p { max-width:710px; margin:10px 0 0; color:var(--muted); }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .two { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(270px,1fr); gap:16px; }
+    .panel { background:var(--surface); border:1px solid var(--line); padding:18px; min-width:0; }
+    .panel.strong { border:2px solid var(--ink); }
+    .panel + .panel { margin-top:14px; }
+    .stat { font:700 34px/1 "Arial Narrow",Arial,sans-serif; margin:8px 0; }
+    .meta { display:flex; gap:8px; flex-wrap:wrap; margin:15px 0; }
+    .tag { display:inline-block; border:1px solid var(--line); padding:3px 7px; font:12px Consolas,monospace; background:#fafafa; }
+    .tag.active { border-color:var(--ink); background:var(--active); }
+    .filters { display:grid; grid-template-columns:1.3fr 1fr auto; gap:10px; align-items:end; margin-bottom:13px; }
+    .filters label { display:block; font-size:12px; font-weight:700; margin-bottom:5px; }
+    .table-wrap { overflow-x:auto; background:#fff; border:1px solid var(--line); }
+    table { width:100%; border-collapse:collapse; min-width:640px; }
+    th,td { border-bottom:1px solid var(--line); padding:12px 11px; text-align:left; vertical-align:top; }
+    th { background:#e9e9e7; font:700 11px Consolas,monospace; text-transform:uppercase; letter-spacing:.04em; }
+    tr:last-child td { border-bottom:0; }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 16px; }
+    .span-2 { grid-column:1/-1; }
+    .drop { border:2px dashed #888; background:#fafafa; padding:22px; text-align:center; }
+    .flow { display:flex; gap:0; margin:20px 0; overflow-x:auto; }
+    .flow span { flex:1; min-width:130px; border:1px solid var(--line); padding:9px; font:12px Consolas,monospace; text-align:center; background:#fff; }
+    .flow span.current { border-color:var(--ink); background:var(--active); font-weight:700; }
+    .timeline { border-left:2px solid var(--ink); padding-left:17px; margin:6px 0 0 8px; }
+    .timeline li { padding:0 0 15px 8px; }
+    .timeline li::marker { content:"■  "; font-size:9px; }
+    .notice { border-left:4px solid var(--accent); background:#e7ecee; padding:11px 14px; margin:16px 0; }
+    .question { border:1px dashed #777; padding:12px; background:#fafafa; margin-top:14px; font-size:13px; }
+    .toast { position:fixed; right:20px; bottom:20px; max-width:360px; background:var(--ink); color:#fff; padding:13px 17px; box-shadow:4px 4px 0 #aaa; z-index:20; }
+    [hidden] { display:none !important; }
+    @media(max-width:850px){ .shell{grid-template-columns:1fr} .rail{border-right:0;border-bottom:2px solid var(--ink)} .nav{grid-template-columns:repeat(3,minmax(0,1fr))} .grid,.two{grid-template-columns:1fr} .filters{grid-template-columns:1fr 1fr} .content{padding:22px 16px 60px} .topbar{padding:12px 16px} }
+    @media(max-width:570px){ .nav{grid-template-columns:repeat(2,minmax(0,1fr))} .filters,.form-grid{grid-template-columns:1fr} .span-2{grid-column:auto} .login-card{padding:22px} }
+  </style>
+</head>
+<body>
+  <section id="login-view" class="login">
+    <div class="login-card">
+      <div class="mark">OTO</div>
+      <p class="eyebrow" style="margin-top:22px">Acesso à gestão de dados turísticos</p>
+      <h1>Entrar no Observatório</h1>
+      <p class="muted">Use uma conta autorizada para consultar e atualizar as informações.</p>
+      <form id="login-form">
+        <div class="field"><label for="email">E-mail</label><input id="email" type="email" value="operador@oto.exemplo" required></div>
+        <div class="field"><label for="senha">Senha</label><input id="senha" type="password" value="exemplo" required></div>
+        <div class="field"><label for="perfil">Perfil para demonstração</label><select id="perfil"><option>Operador</option><option>Administrador</option><option>Gestor</option></select></div>
+        <button class="button primary" type="submit" style="width:100%">Entrar</button>
+      </form>
+      <p class="small muted" style="margin-top:20px">Wireframe para validação do fluxo. Credenciais ilustrativas.</p>
+    </div>
+  </section>
+
+  <div id="app-view" class="shell" hidden>
+    <aside class="rail" aria-label="Navegação principal">
+      <div class="mark">OTO</div>
+      <p class="rail-caption">Operação</p>
+      <nav class="nav">
+        <button data-go="home">Visão geral</button>
+        <button data-go="inventory">Inventário</button>
+        <button data-go="import">Importações</button>
+        <button data-go="issqn">ISSQN</button>
+        <button data-go="ods">Indicadores ODS</button>
+        <button data-go="users" data-admin-only>Usuários e acesso</button>
+      </nav>
+      <div class="rail-foot"><strong id="rail-role">Operador</strong><br><span class="muted">Conta de demonstração</span><br><button class="button link" id="logout" style="margin-top:9px">Sair</button></div>
+    </aside>
+    <main>
+      <div class="topbar"><span class="crumb" id="breadcrumb">OTO / Visão geral</span><span class="small">Dados de exemplo · wireframe</span></div>
+      <div class="content">
+        <section id="screen-home" class="screen">
+          <div class="screen-head"><p class="eyebrow">Área de trabalho</p><h2>Dados sob acompanhamento</h2><p>Escolha uma fonte ou revise os itens que precisam de atenção.</p></div>
+          <div class="grid">
+            <div class="panel strong"><p class="eyebrow">Inventário</p><div class="stat">03</div><p>Itens cadastrados</p><button class="button" data-go="inventory">Abrir inventário</button></div>
+            <div class="panel"><p class="eyebrow">Importações</p><div class="stat">02</div><p>Linhas para revisão</p><button class="button" data-go="import-result">Ver conferência</button></div>
+            <div class="panel"><p class="eyebrow">ISSQN</p><div class="stat">01</div><p>Vínculo pendente</p><button class="button" data-go="issqn">Revisar vínculo</button></div>
+          </div>
+          <div class="panel" style="margin-top:16px"><h3>Caminho principal</h3><div class="flow"><span class="current">1. Consultar fonte</span><span>2. Atualizar dados</span><span>3. Conferir resultado</span><span>4. Acompanhar indicador</span></div><p class="small muted">A origem, o período e o estado de cada dado acompanham as consultas para facilitar a conferência.</p></div>
+        </section>
+
+        <section id="screen-inventory" class="screen">
+          <div class="screen-head spread"><div><p class="eyebrow">Inventário turístico</p><h2>Estabelecimentos e atrativos</h2><p>Encontre, cadastre e atualize itens da base turística.</p></div><button class="button primary" data-go="item-form">Novo item</button></div>
+          <div class="filters"><div><label for="busca">Buscar pelo nome</label><input id="busca" placeholder="Nome do estabelecimento"></div><div><label for="categoria-filtro">Categoria</label><select id="categoria-filtro"><option>Todas as categorias</option><option>Hospedagem</option><option>Alimentação</option><option>Atrativo</option></select></div><button class="button" id="filter-inventory">Filtrar</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Categoria</th><th>Identificação</th><th>Status</th><th>Ação</th></tr></thead><tbody><tr><td>Hotel Exemplo A</td><td>Hospedagem</td><td>00.000.000/0001-00</td><td><span class="tag active">Ativo</span></td><td><button class="button link" data-go="item-detail">Ver detalhes</button></td></tr><tr><td>Restaurante Exemplo B</td><td>Alimentação</td><td>11.111.111/0001-11</td><td><span class="tag active">Ativo</span></td><td><button class="button link" data-go="item-detail">Ver detalhes</button></td></tr><tr><td>Atrativo Exemplo C</td><td>Atrativo</td><td>Cadastro interno 003</td><td><span class="tag active">Ativo</span></td><td><button class="button link" data-go="item-detail">Ver detalhes</button></td></tr></tbody></table></div>
+          <div class="question">Validar com o OTO: categorias, campos exibidos na lista e filtros necessários no trabalho diário.</div>
+        </section>
+
+        <section id="screen-item-form" class="screen">
+          <div class="screen-head"><p class="eyebrow">Inventário / edição</p><h2>Cadastrar ou editar item</h2><p>Campos ilustrativos. Os campos obrigatórios por categoria serão confirmados com o OTO.</p></div>
+          <div class="two"><form class="panel strong" data-submit-to="item-detail" data-message="Item salvo no Inventário."><div class="form-grid"><div class="field"><label for="item-nome">Nome *</label><input id="item-nome" value="Hotel Exemplo A" required></div><div class="field"><label for="item-categoria">Categoria *</label><select id="item-categoria"><option>Hospedagem</option><option>Alimentação</option><option>Atrativo</option></select></div><div class="field"><label for="item-documento">CNPJ ou identificação</label><input id="item-documento" value="00.000.000/0001-00"></div><div class="field"><label for="item-status">Status</label><select id="item-status"><option>Ativo</option><option>Inativo</option></select></div><div class="field span-2"><label for="item-endereco">Endereço</label><input id="item-endereco" value="Rua Exemplo, 100"></div><div class="field span-2"><label for="item-nota">Observação</label><textarea id="item-nota" placeholder="Informação de apoio à equipe"></textarea></div></div><div class="row"><button class="button primary" type="submit">Salvar item</button><button class="button ghost" type="button" data-go="inventory">Cancelar</button></div></form><div class="panel"><h3>Antes de salvar</h3><p>O sistema deve apontar campos obrigatórios ausentes e possíveis duplicidades.</p><div class="notice">Alterações posteriores serão registradas com usuário, data e valores anterior e novo.</div></div></div>
+        </section>
+
+        <section id="screen-item-detail" class="screen">
+          <div class="screen-head spread"><div><p class="eyebrow">Inventário / detalhe</p><h2>Hotel Exemplo A</h2><div class="meta"><span class="tag" id="detail-status">Ativo</span><span class="tag">Hospedagem</span><span class="tag">Fonte: Inventário</span></div></div><div class="row"><button class="button" data-go="item-form">Editar</button><button class="button danger" id="deactivate">Inativar</button></div></div>
+          <div class="two"><div class="panel"><h3>Dados do item</h3><p><strong>Identificação:</strong> 00.000.000/0001-00</p><p><strong>Endereço:</strong> Rua Exemplo, 100</p><p><strong>Categoria:</strong> Hospedagem</p><p><strong>Última atualização:</strong> 07/10/2026</p></div><div class="panel"><h3>Histórico de alterações</h3><ol class="timeline"><li>07/10/2026 · Nome atualizado por Operador<br><span class="muted">Antes: Hotel A · Depois: Hotel Exemplo A</span></li><li>01/10/2026 · Item cadastrado por Operador</li></ol></div></div>
+          <div class="question">Validar com o OTO: inativação preserva o histórico? Quem pode reativar um item?</div>
+        </section>
+
+        <section id="screen-import" class="screen">
+          <div class="screen-head"><p class="eyebrow">Importações</p><h2>Adicionar dados à base</h2><p>Escolha a origem, envie um arquivo e confira as linhas antes de concluir.</p></div>
+          <div class="flow"><span class="current">1. Selecionar arquivo</span><span>2. Conferir linhas</span><span>3. Concluir carga</span></div>
+          <div class="two"><div class="panel strong"><div class="field"><label for="import-source">Origem dos dados</label><select id="import-source"><option>Inventário Turístico</option><option>ISSQN</option><option>Módulo ODS</option></select></div><div class="drop"><strong>Arquivo de exemplo</strong><p class="small muted">Planilha no formato combinado para a fonte escolhida.</p><input aria-label="Selecionar arquivo" type="file" accept=".csv,.xlsx,.ods"></div><div class="row" style="margin-top:16px"><button class="button primary" data-go="import-result">Conferir importação</button></div></div><div class="panel"><h3>O que será conferido</h3><p>Campos obrigatórios, linhas duplicadas, formato de período e correspondência com itens do Inventário.</p><div class="meta"><span class="tag">Fonte</span><span class="tag">Arquivo</span><span class="tag">Data da carga</span><span class="tag">Responsável</span></div></div></div>
+        </section>
+
+        <section id="screen-import-result" class="screen">
+          <div class="screen-head"><p class="eyebrow">Importações / conferência</p><h2>Resultado da importação</h2><p>Exemplo de quatro linhas lidas: duas aceitas e duas que precisam de revisão.</p></div>
+          <div class="grid"><div class="panel"><p class="eyebrow">Lidas</p><div class="stat">04</div></div><div class="panel"><p class="eyebrow">Importadas</p><div class="stat">02</div></div><div class="panel"><p class="eyebrow">Rejeitadas</p><div class="stat">02</div></div></div>
+          <div class="panel" style="margin-top:16px"><h3>Linhas para revisão</h3><div class="table-wrap"><table><thead><tr><th>Linha</th><th>Identificação</th><th>Problema</th><th>Resultado</th></tr></thead><tbody><tr><td>3</td><td>Hotel Exemplo A</td><td>Possível duplicidade</td><td>Não importada</td></tr><tr><td>4</td><td>Sem identificação</td><td>Campo obrigatório ausente</td><td>Não importada</td></tr></tbody></table></div><div class="row" style="margin-top:16px"><button class="button primary" data-toast="Importação concluída com 2 registros aceitos e 2 rejeitados.">Concluir importação</button><button class="button" data-go="import">Escolher outro arquivo</button></div></div>
+          <div class="question">Validar com o OTO: rejeitar somente as linhas problemáticas ou bloquear o arquivo inteiro?</div>
+        </section>
+
+        <section id="screen-issqn" class="screen">
+          <div class="screen-head spread"><div><p class="eyebrow">ISSQN</p><h2>Registros econômicos</h2><p>Confira o período e a correspondência de cada registro com o Inventário.</p></div><button class="button primary" data-go="import" data-source="ISSQN">Importar ISSQN</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Referência recebida</th><th>Período</th><th>Valor</th><th>Vínculo</th><th>Ação</th></tr></thead><tbody><tr><td>Hotel Exemplo A</td><td>09/2026</td><td>R$ 8.000</td><td><span class="tag active">Vinculado</span></td><td><button class="button link" data-go="link">Ver vínculo</button></td></tr><tr><td>Estabelecimento Exemplo D</td><td>09/2026</td><td>R$ 1.500</td><td><span class="tag">Pendente</span></td><td><button class="button link" data-go="link">Revisar vínculo</button></td></tr></tbody></table></div>
+          <div class="question">Validar com o OTO: qual identificador permite vincular ISSQN com segurança ao estabelecimento?</div>
+        </section>
+
+        <section id="screen-link" class="screen">
+          <div class="screen-head"><p class="eyebrow">ISSQN / revisão</p><h2>Confirmar vínculo</h2><p>O registro recebido não teve correspondência única. Selecione o item correto.</p></div>
+          <div class="two"><div class="panel"><h3>Registro recebido</h3><p><strong>Nome:</strong> Estabelecimento Exemplo D</p><p><strong>Período:</strong> 09/2026</p><p><strong>Valor:</strong> R$ 1.500</p><span class="tag">Pendente de revisão</span></div><form class="panel strong" data-submit-to="issqn" data-message="Vínculo confirmado e salvo."><div class="field"><label for="link-item">Item do Inventário</label><select id="link-item"><option value="">Selecionar item</option><option>Hotel Exemplo A</option><option>Restaurante Exemplo B</option><option>Atrativo Exemplo C</option></select></div><p class="small muted">O vínculo manual deve ficar registrado para conferência posterior.</p><button class="button primary" type="submit">Confirmar vínculo</button></form></div>
+        </section>
+
+        <section id="screen-ods" class="screen">
+          <div class="screen-head spread"><div><p class="eyebrow">Módulo ODS</p><h2>Indicadores</h2><p>Cadastre indicadores e acompanhe as informações registradas ao longo do tempo.</p></div><button class="button primary" data-go="ods-form">Novo indicador</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Indicador</th><th>ODS</th><th>Última medição</th><th>Meta</th><th>Ação</th></tr></thead><tbody><tr><td>Práticas sustentáveis nos estabelecimentos</td><td>ODS 12</td><td>09/2026</td><td>Em definição</td><td><button class="button link" data-go="indicator">Ver histórico</button></td></tr></tbody></table></div>
+        </section>
+
+        <section id="screen-ods-form" class="screen">
+          <div class="screen-head"><p class="eyebrow">Módulo ODS / cadastro</p><h2>Novo indicador</h2><p>Defina o que será acompanhado e sua relação com os ODS.</p></div>
+          <form class="panel strong" data-submit-to="ods" data-message="Indicador cadastrado."><div class="form-grid"><div class="field span-2"><label for="ods-nome">Nome *</label><input id="ods-nome" placeholder="Nome do indicador" required></div><div class="field"><label for="ods-numero">ODS relacionado</label><select id="ods-numero"><option>ODS 12</option><option>ODS 8</option><option>ODS 11</option></select></div><div class="field"><label for="ods-meta">Meta</label><input id="ods-meta" placeholder="Meta ou referência"></div><div class="field span-2"><label for="ods-descricao">Descrição</label><textarea id="ods-descricao" placeholder="O que este indicador mede?"></textarea></div></div><div class="row"><button class="button primary" type="submit">Salvar indicador</button><button class="button" type="button" data-go="ods">Cancelar</button></div></form>
+        </section>
+
+        <section id="screen-indicator" class="screen">
+          <div class="screen-head spread"><div><p class="eyebrow">Módulo ODS / detalhe</p><h2>Práticas sustentáveis nos estabelecimentos</h2><div class="meta"><span class="tag">ODS 12</span><span class="tag">Regra de exemplo</span><span class="tag">Fonte: Inventário + pesquisa</span></div></div><button class="button primary" data-go="research-form">Registrar dado</button></div>
+          <div class="two"><div class="panel strong"><h3>Resultado demonstrativo</h3><div class="stat">01</div><p>Item ativo marcado com prática sustentável.</p><p class="small muted">Regra ilustrativa: contar itens ativos cujo campo de sustentabilidade esteja marcado como “Sim”.</p><button class="button" data-go="mapping">Ver vínculo com Inventário</button></div><div class="panel"><h3>Histórico</h3><div class="table-wrap"><table style="min-width:0"><thead><tr><th>Período</th><th>Valor</th></tr></thead><tbody><tr><td>07/2026</td><td>0</td></tr><tr><td>08/2026</td><td>1</td></tr><tr><td>09/2026</td><td>1</td></tr></tbody></table></div></div></div>
+          <div class="question">Validar com o OTO: quais indicadores e fórmulas devem representar a operação real?</div>
+        </section>
+
+        <section id="screen-research-form" class="screen">
+          <div class="screen-head"><p class="eyebrow">Módulo ODS / dado de pesquisa</p><h2>Registrar dado</h2><p>Associe um resultado de pesquisa ao indicador e ao período de referência.</p></div>
+          <form class="panel strong" data-submit-to="indicator" data-message="Dado de pesquisa registrado."><div class="form-grid"><div class="field"><label for="pesquisa-indicador">Indicador *</label><select id="pesquisa-indicador"><option>Práticas sustentáveis nos estabelecimentos</option></select></div><div class="field"><label for="pesquisa-data">Data de referência *</label><input id="pesquisa-data" type="date" value="2026-09-30" required></div><div class="field"><label for="pesquisa-valor">Valor *</label><input id="pesquisa-valor" type="number" value="1" required></div><div class="field"><label for="pesquisa-origem">Origem *</label><input id="pesquisa-origem" value="Pesquisa de exemplo" required></div></div><div class="row"><button class="button primary" type="submit">Salvar dado</button><button class="button" type="button" data-go="indicator">Cancelar</button></div></form>
+        </section>
+
+        <section id="screen-mapping" class="screen">
+          <div class="screen-head"><p class="eyebrow">Módulo ODS / vínculo</p><h2>Dados do Inventário no indicador</h2><p>Escolha quais campos alimentam a regra de cálculo documentada.</p></div>
+          <div class="two"><div class="panel"><h3>Vínculo proposto</h3><p><strong>Categoria:</strong> Hospedagem</p><p><strong>Campo:</strong> Prática sustentável</p><p><strong>Condição:</strong> Item ativo e resposta “Sim”</p></div><div class="panel strong"><h3>Conferência</h3><p>Itens de exemplo que atendem à regra: <strong>1</strong>.</p><button class="button primary" data-go="indicator" data-toast="Vínculo do indicador salvo.">Salvar vínculo</button></div></div>
+        </section>
+
+        <section id="screen-users" class="screen">
+          <div class="screen-head"><p class="eyebrow">Administração</p><h2>Usuários e acesso</h2><p>Distribua funções conforme a responsabilidade de cada pessoa.</p></div>
+          <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Administrador</th><th>Operador</th><th>Gestor</th></tr></thead><tbody><tr><td>Gerenciar usuários</td><td>Sim</td><td>Não</td><td>Não</td></tr><tr><td>Editar Inventário</td><td>Sim</td><td>Sim</td><td>Não</td></tr><tr><td>Importar e conferir dados</td><td>Sim</td><td>Sim</td><td>Não</td></tr><tr><td>Consultar indicadores</td><td>Sim</td><td>Sim</td><td>Sim</td></tr></tbody></table></div>
+          <div class="question">Validar com o OTO: estes três perfis e esta divisão de permissões estão corretos?</div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script>
+    const titles={home:'Visão geral',inventory:'Inventário', 'item-form':'Inventário / cadastro', 'item-detail':'Inventário / detalhe',import:'Importações','import-result':'Importações / conferência',issqn:'ISSQN',link:'ISSQN / vínculo',ods:'Indicadores ODS','ods-form':'ODS / cadastro',indicator:'ODS / histórico','research-form':'ODS / pesquisa',mapping:'ODS / vínculo',users:'Usuários e acesso'};
+    let role='Operador';
+    function toast(message){const el=document.getElementById('toast');el.textContent=message;el.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.hidden=true,3500);}
+    function show(name){
+      if(name==='users'&&role!=='Administrador'){toast('Seu perfil não permite gerenciar usuários.');return;}
+      document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('active',el.id==='screen-'+name));
+      document.querySelectorAll('.nav [data-go]').forEach(el=>el.setAttribute('aria-current',el.dataset.go===name?'page':'false'));
+      document.getElementById('breadcrumb').textContent='OTO / '+(titles[name]||name);
+      window.scrollTo(0,0);
+    }
+    document.getElementById('login-form').addEventListener('submit',event=>{
+      event.preventDefault();role=document.getElementById('perfil').value;
+      document.getElementById('rail-role').textContent=role;
+      document.querySelector('[data-admin-only]').hidden=role!=='Administrador';
+      document.getElementById('login-view').hidden=true;document.getElementById('app-view').hidden=false;show('home');
+    });
+    document.getElementById('logout').addEventListener('click',()=>{document.getElementById('app-view').hidden=true;document.getElementById('login-view').hidden=false;toast('Acesso encerrado.');});
+    document.addEventListener('click',event=>{const button=event.target.closest('[data-go],[data-toast]');if(!button)return;if(button.dataset.source)document.getElementById('import-source').value=button.dataset.source;if(button.dataset.go)show(button.dataset.go);if(button.dataset.toast)toast(button.dataset.toast);});
+    document.querySelectorAll('form[data-submit-to]').forEach(form=>form.addEventListener('submit',event=>{event.preventDefault();if(!form.reportValidity())return;show(form.dataset.submitTo);toast(form.dataset.message);}));
+    document.getElementById('filter-inventory').addEventListener('click',()=>toast('Os filtros foram aplicados nesta demonstração de fluxo.'));
+    document.getElementById('deactivate').addEventListener('click',()=>{document.getElementById('detail-status').textContent='Inativo';toast('Item inativado. O histórico permanece disponível.');});
+  </script>
+</body>
+</html>
