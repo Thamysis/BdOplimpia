@@ -1,63 +1,47 @@
 {% extends "base.html" %}
 {% block titulo %}Prévia da importação — OTO{% endblock %}
+{% block cabecalho %}Prévia da importação{% endblock %}
+{% block nav_importacao %}ativo{% endblock %}
 {% block conteudo %}
-<h1>Prévia da importação</h1>
-<p>Arquivo: <strong>{{ nome_arquivo }}</strong>{% if fonte %} · Fonte: {{ fonte }}{% endif %}</p>
+<p class="text-muted">Arquivo: <strong>{{ nome_arquivo }}</strong>{% if fonte %} · Fonte: {{ fonte }}{% endif %}</p>
 
-<div class="resumo-importacao">
-  <div class="caixa"><div class="num">{{ resultado.total_lidos }}</div>Registros lidos</div>
-  <div class="caixa"><div class="num">{{ resultado.total_aceitas }}</div>Serão importados</div>
-  <div class="caixa"><div class="num">{{ resultado.total_rejeitadas }}</div>Serão rejeitados</div>
+<div class="row g-3 mb-4">
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor">{{ resultado.total_lidos }}</span><span class="rotulo">Lidos</span></div></div></div>
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor text-success">{{ resultado.total_aceitas }}</span><span class="rotulo">Serão importados</span></div></div></div>
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor text-danger">{{ resultado.total_rejeitadas }}</span><span class="rotulo">Serão rejeitados</span></div></div></div>
 </div>
 
-<div class="cartao">
-  <h2>Linhas aceitas</h2>
-  <table>
+<div class="card mb-3">
+  <div class="card-header text-success"><i class="bi bi-check-circle"></i> Linhas aceitas</div>
+  <div class="table-responsive"><table class="table table-sm table-hover mb-0">
     <thead><tr><th>Referência</th><th>Nome</th><th>Bairro</th><th>Documento</th></tr></thead>
     <tbody>
       {% for linha in resultado.aceitas %}
-      <tr>
-        <td>{{ linha.referencia }}</td>
-        <td>{{ linha.dados.nome }}</td>
-        <td>{{ linha.dados.bairro|default:"—" }}</td>
-        <td>{{ linha.dados.documento|default:"—" }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="4">Nenhuma linha aceita.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      <tr><td>{{ linha.referencia }}</td><td>{{ linha.dados.nome }}</td><td>{{ linha.dados.bairro|default:"—" }}</td><td>{{ linha.dados.documento|default:"—" }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="text-muted">Nenhuma linha aceita.</td></tr>{% endfor %}
+    </tbody></table></div>
 </div>
 
-<div class="cartao">
-  <h2>Linhas rejeitadas</h2>
-  <table>
+<div class="card mb-3">
+  <div class="card-header text-danger"><i class="bi bi-exclamation-triangle"></i> Linhas rejeitadas</div>
+  <div class="table-responsive"><table class="table table-sm table-hover mb-0">
     <thead><tr><th>Referência</th><th>Nome</th><th>Tipo</th><th>Motivo</th></tr></thead>
     <tbody>
       {% for linha in resultado.rejeitadas %}
-      <tr>
-        <td>{{ linha.referencia }}</td>
-        <td>{{ linha.dados.nome|default:"—" }}</td>
-        <td>{{ linha.tipo_display }}</td>
-        <td>{{ linha.motivo }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="4">Nenhuma linha rejeitada.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      <tr><td>{{ linha.referencia }}</td><td>{{ linha.dados.nome|default:"—" }}</td>
+        <td><span class="badge text-bg-warning">{{ linha.tipo_display }}</span></td><td>{{ linha.motivo }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="text-muted">Nenhuma linha rejeitada.</td></tr>{% endfor %}
+    </tbody></table></div>
 </div>
 
-<div class="acoes">
-  <form method="post" action="{% url 'importacao:confirmar' %}" style="display:inline">
-    {% csrf_token %}
-    <button type="submit" {% if resultado.total_aceitas == 0 %}disabled{% endif %}>
-      Confirmar importação ({{ resultado.total_aceitas }})
-    </button>
-  </form>
-  <form method="post" action="{% url 'importacao:cancelar' %}" style="display:inline">
-    {% csrf_token %}
-    <button type="submit" class="botao secundario">Cancelar</button>
-  </form>
+<div class="d-flex gap-2">
+  <form method="post" action="{% url 'importacao:confirmar' %}">{% csrf_token %}
+    <button type="submit" class="btn btn-primary" {% if resultado.total_aceitas == 0 %}disabled{% endif %}>
+      <i class="bi bi-check-lg"></i> Confirmar importação ({{ resultado.total_aceitas }})</button></form>
+  <form method="post" action="{% url 'importacao:cancelar' %}">{% csrf_token %}
+    <button type="submit" class="btn btn-outline-secondary">Cancelar</button></form>
 </div>
 {% endblock %}

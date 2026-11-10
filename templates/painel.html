@@ -1,52 +1,62 @@
 {% extends "base.html" %}
 {% block titulo %}Painel — OTO{% endblock %}
+{% block cabecalho %}Painel{% endblock %}
+{% block nav_painel %}ativo{% endblock %}
 {% block conteudo %}
-<h1>Painel</h1>
-<div class="grade-cartoes">
-  <div class="cartao">
-    <div class="metric">{{ total_ativos }}</div>
-    <div>Itens ativos no Inventário</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-4">
+    <div class="card h-100"><div class="card-body d-flex align-items-center gap-3">
+      <span class="oto-kpi-icone icone"><i class="bi bi-buildings"></i></span>
+      <div class="oto-kpi"><span class="valor">{{ total_ativos }}</span><span class="rotulo">Itens ativos</span></div>
+    </div></div>
   </div>
-  <div class="cartao">
-    <div class="metric">{{ total_inativos }}</div>
-    <div>Itens inativos</div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="card h-100"><div class="card-body d-flex align-items-center gap-3">
+      <span class="oto-kpi-icone icone"><i class="bi bi-archive"></i></span>
+      <div class="oto-kpi"><span class="valor">{{ total_inativos }}</span><span class="rotulo">Itens inativos</span></div>
+    </div></div>
   </div>
-  <div class="cartao">
-    <div class="metric">{{ total_indicadores }}</div>
-    <div>Indicadores ODS</div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="card h-100"><div class="card-body d-flex align-items-center gap-3">
+      <span class="oto-kpi-icone icone"><i class="bi bi-globe-americas"></i></span>
+      <div class="oto-kpi"><span class="valor">{{ total_indicadores }}</span><span class="rotulo">Indicadores ODS</span></div>
+    </div></div>
   </div>
 </div>
 
-<div class="cartao">
-  <h2>Ações</h2>
-  <div class="acoes">
-    <a class="botao" href="{% url 'inventario:lista' %}">Consultar Inventário</a>
-    <a class="botao secundario" href="{% url 'inventario:relatorios' %}">Relatórios visuais</a>
-    {% if user.pode_editar_inventario %}<a class="botao" href="{% url 'inventario:novo' %}">Cadastrar item</a>{% endif %}
-    {% if user.pode_importar %}<a class="botao secundario" href="{% url 'importacao:importar' %}">Importar dados</a>{% endif %}
-    {% if user.pode_consultar_indicadores %}<a class="botao secundario" href="{% url 'ods:indicador_lista' %}">Indicadores ODS</a>{% endif %}
+<div class="card mb-4">
+  <div class="card-header">Ações rápidas</div>
+  <div class="card-body d-flex flex-wrap gap-2">
+    <a class="btn btn-primary" href="{% url 'inventario:lista' %}"><i class="bi bi-search"></i> Consultar Inventário</a>
+    <a class="btn btn-outline-primary" href="{% url 'inventario:relatorios' %}"><i class="bi bi-bar-chart-line"></i> Relatórios visuais</a>
+    {% if user.pode_editar_inventario %}<a class="btn btn-outline-primary" href="{% url 'inventario:novo' %}"><i class="bi bi-plus-lg"></i> Cadastrar item</a>{% endif %}
+    {% if user.pode_importar %}<a class="btn btn-outline-primary" href="{% url 'importacao:importar' %}"><i class="bi bi-upload"></i> Importar dados</a>{% endif %}
+    {% if user.pode_consultar_indicadores %}<a class="btn btn-outline-primary" href="{% url 'ods:indicador_lista' %}"><i class="bi bi-globe-americas"></i> Indicadores ODS</a>{% endif %}
   </div>
 </div>
 
 {% if ultimas_importacoes %}
-<div class="cartao">
-  <h2>Últimas importações</h2>
-  <table>
-    <thead><tr><th>#</th><th>Arquivo</th><th>Status</th><th>Lidos</th><th>Importados</th><th>Rejeitados</th><th>Data</th></tr></thead>
-    <tbody>
-      {% for imp in ultimas_importacoes %}
-      <tr>
-        <td>{{ imp.id }}</td>
-        <td>{{ imp.arquivo_origem|default:"—" }}</td>
-        <td>{{ imp.get_status_display }}</td>
-        <td>{{ imp.qtd_registros }}</td>
-        <td>{{ imp.qtd_importados }}</td>
-        <td>{{ imp.qtd_rejeitados }}</td>
-        <td>{{ imp.data_hora|date:"d/m/Y H:i" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="card">
+  <div class="card-header">Últimas importações</div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>#</th><th>Arquivo</th><th>Status</th><th class="text-end">Lidos</th><th class="text-end">Importados</th><th class="text-end">Rejeitados</th><th>Data</th></tr></thead>
+      <tbody>
+        {% for imp in ultimas_importacoes %}
+        <tr>
+          <td>{{ imp.id }}</td>
+          <td>{{ imp.arquivo_origem|default:"—" }}</td>
+          <td><span class="badge text-bg-light">{{ imp.get_status_display }}</span></td>
+          <td class="text-end">{{ imp.qtd_registros }}</td>
+          <td class="text-end">{{ imp.qtd_importados }}</td>
+          <td class="text-end">{{ imp.qtd_rejeitados }}</td>
+          <td>{{ imp.data_hora|date:"d/m/Y H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endif %}
 {% endblock %}

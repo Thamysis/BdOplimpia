@@ -1,28 +1,26 @@
 {% extends "base.html" %}
 {% block titulo %}Importar planilha oficial — OTO{% endblock %}
+{% block cabecalho %}Importar aba da planilha oficial{% endblock %}
+{% block nav_importacao %}ativo{% endblock %}
 {% block conteudo %}
-<h1>Importar aba da planilha oficial</h1>
-<p>Para a planilha <strong>INVENTARIO OFICIAL OLIMPIA</strong>, exporte uma aba de
-categoria (ex.: Meios de Hospedagem) como CSV ou XLSX e envie aqui, informando o nome
-do segmento. O sistema detecta automaticamente a linha de cabeçalho, extrai os campos
-comuns (nome, razão social, documento, endereço, bairro, coordenadas), os contatos, o
-Cadastur e o CNAE, e registra as demais colunas como campos específicos do segmento.</p>
-
-<div class="cartao">
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    {% for campo in form %}
-    <div class="linha-form">
-      <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
-      {{ campo }}
-      {% for erro in campo.errors %}<div class="erro">{{ erro }}</div>{% endfor %}
-    </div>
-    {% endfor %}
-    <div class="acoes">
-      <button type="submit">Importar aba</button>
-      <a class="botao secundario" href="{% url 'importacao:importar' %}">Importação genérica</a>
-    </div>
-  </form>
+<div class="alert alert-light border">
+  <i class="bi bi-info-circle text-primary"></i>
+  Para a planilha <strong>INVENTARIO OFICIAL OLIMPIA</strong>, exporte uma aba de categoria
+  (ex.: Meios de Hospedagem) como CSV/XLSX e envie aqui, informando o segmento. O sistema detecta
+  o cabeçalho, extrai campos-base, contatos, Cadastur e CNAE, e registra as demais colunas como
+  campos específicos do segmento.
+</div>
+<div class="card">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {% for campo in form %}{% include "_campo.html" with campo=campo %}{% endfor %}
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Importar aba</button>
+        <a class="btn btn-outline-secondary" href="{% url 'importacao:importar' %}">Importação genérica</a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
