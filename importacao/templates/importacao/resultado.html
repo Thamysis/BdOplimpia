@@ -1,31 +1,29 @@
 {% extends "base.html" %}
 {% block titulo %}Resultado da importação — OTO{% endblock %}
+{% block cabecalho %}Resultado — {{ importacao.get_status_display }}{% endblock %}
+{% block nav_importacao %}ativo{% endblock %}
 {% block conteudo %}
-<h1>Resultado — {{ importacao.get_status_display }}</h1>
-<p>Arquivo: <strong>{{ importacao.arquivo_origem }}</strong></p>
-
-<div class="resumo-importacao">
-  <div class="caixa"><div class="num">{{ importacao.qtd_registros }}</div>Registros lidos</div>
-  <div class="caixa"><div class="num">{{ importacao.qtd_importados }}</div>Importados</div>
-  <div class="caixa"><div class="num">{{ importacao.qtd_rejeitados }}</div>Rejeitados</div>
+<p class="text-muted">Arquivo: <strong>{{ importacao.arquivo_origem }}</strong></p>
+<div class="row g-3 mb-4">
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor">{{ importacao.qtd_registros }}</span><span class="rotulo">Lidos</span></div></div></div>
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor text-success">{{ importacao.qtd_importados }}</span><span class="rotulo">Importados</span></div></div></div>
+  <div class="col-4"><div class="card text-center"><div class="card-body oto-kpi align-items-center">
+    <span class="valor text-danger">{{ importacao.qtd_rejeitados }}</span><span class="rotulo">Rejeitados</span></div></div></div>
 </div>
-
-<div class="cartao">
-  <h2>Inconsistências</h2>
-  <table>
+<div class="card mb-3">
+  <div class="card-header"><i class="bi bi-exclamation-triangle"></i> Inconsistências</div>
+  <div class="table-responsive"><table class="table table-sm mb-0">
     <thead><tr><th>Referência</th><th>Tipo</th><th>Motivo</th></tr></thead>
     <tbody>
       {% for inc in importacao.inconsistencias.all %}
-      <tr><td>{{ inc.referencia_origem }}</td><td>{{ inc.get_tipo_display }}</td><td>{{ inc.descricao }}</td></tr>
-      {% empty %}
-      <tr><td colspan="3">Nenhuma inconsistência encontrada.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      <tr><td>{{ inc.referencia_origem }}</td><td><span class="badge text-bg-warning">{{ inc.get_tipo_display }}</span></td><td>{{ inc.descricao }}</td></tr>
+      {% empty %}<tr><td colspan="3" class="text-muted">Nenhuma inconsistência.</td></tr>{% endfor %}
+    </tbody></table></div>
 </div>
-
-<div class="acoes">
-  <a class="botao" href="{% url 'importacao:importar' %}">Nova importação</a>
-  <a class="botao secundario" href="{% url 'inventario:lista' %}">Ver Inventário</a>
+<div class="d-flex gap-2">
+  <a class="btn btn-primary" href="{% url 'importacao:importar' %}"><i class="bi bi-upload"></i> Nova importação</a>
+  <a class="btn btn-outline-primary" href="{% url 'inventario:lista' %}">Ver Inventário</a>
 </div>
 {% endblock %}

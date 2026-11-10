@@ -1,73 +1,86 @@
 {% extends "base.html" %}
 {% block titulo %}Inventário — OTO{% endblock %}
+{% block cabecalho %}Inventário Turístico{% endblock %}
+{% block nav_inventario %}ativo{% endblock %}
 {% block conteudo %}
-<h1>Inventário Turístico</h1>
 
-<div class="acoes">
-  {% if user.pode_editar_inventario %}<a class="botao" href="{% url 'inventario:novo' %}">Cadastrar item</a>{% endif %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="text-muted mb-0">Consulte e filtre os itens do trade turístico.</p>
+  {% if user.pode_editar_inventario %}
+  <a class="btn btn-primary" href="{% url 'inventario:novo' %}"><i class="bi bi-plus-lg"></i> Cadastrar item</a>
+  {% endif %}
 </div>
 
-<div class="cartao">
-  <form method="get" class="filtros">
-    <div>
-      <label for="nome">Nome</label>
-      <input type="text" id="nome" name="nome" value="{{ filtros.nome }}" placeholder="Buscar por nome">
-    </div>
-    <div>
-      <label for="segmento">Categoria/Segmento</label>
-      <select id="segmento" name="segmento">
-        <option value="">Todas</option>
-        {% for s in segmentos %}
-        <option value="{{ s.id }}" {% if filtros.segmento == s.id|stringformat:'s' %}selected{% endif %}>{{ s.nome }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div>
-      <label for="status">Status</label>
-      <select id="status" name="status">
-        <option value="">Todos (ativos)</option>
-        {% for valor, rotulo in status_choices %}
-        <option value="{{ valor }}" {% if filtros.status == valor %}selected{% endif %}>{{ rotulo }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div>
-      <label><input type="checkbox" name="incluir_inativos" value="1" {% if filtros.incluir_inativos %}checked{% endif %}> Incluir inativos</label>
-    </div>
-    <div class="acoes">
-      <button type="submit">Filtrar</button>
-      <a class="botao secundario" href="{% url 'inventario:lista' %}">Limpar</a>
-    </div>
-  </form>
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label" for="nome">Nome</label>
+        <input type="text" id="nome" name="nome" value="{{ filtros.nome }}" class="form-control" placeholder="Buscar por nome">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="segmento">Categoria/Segmento</label>
+        <select id="segmento" name="segmento" class="form-select">
+          <option value="">Todas</option>
+          {% for s in segmentos %}
+          <option value="{{ s.id }}" {% if filtros.segmento == s.id|stringformat:'s' %}selected{% endif %}>{{ s.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" for="status">Status</label>
+        <select id="status" name="status" class="form-select">
+          <option value="">Todos (ativos)</option>
+          {% for valor, rotulo in status_choices %}
+          <option value="{{ valor }}" {% if filtros.status == valor %}selected{% endif %}>{{ rotulo }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-funnel"></i> Filtrar</button>
+        <a class="btn btn-outline-secondary" href="{% url 'inventario:lista' %}">Limpar</a>
+      </div>
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="incluir_inativos" name="incluir_inativos" value="1" {% if filtros.incluir_inativos %}checked{% endif %}>
+          <label class="form-check-label" for="incluir_inativos">Incluir itens inativos</label>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 
-<div class="cartao">
-  <table>
-    <thead><tr><th>Nome</th><th>Bairro</th><th>Documento</th><th>Status</th><th></th></tr></thead>
-    <tbody>
-      {% for item in itens %}
-      <tr>
-        <td><a href="{% url 'inventario:detalhe' item.pk %}">{{ item.nome }}</a></td>
-        <td>{{ item.bairro|default:"—" }}</td>
-        <td>{{ item.documento|default:"—" }}</td>
-        <td>
-          {% if item.esta_ativo %}<span class="etiqueta ativo">Ativo</span>
-          {% else %}<span class="etiqueta inativo">Inativo</span>{% endif %}
-        </td>
-        <td><a class="botao pequeno secundario" href="{% url 'inventario:detalhe' item.pk %}">Ver</a></td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="5">Nenhum item encontrado.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Nome</th><th>Bairro</th><th>Documento</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
+      <tbody>
+        {% for item in itens %}
+        <tr>
+          <td><a class="fw-semibold text-decoration-none" href="{% url 'inventario:detalhe' item.pk %}">{{ item.nome }}</a></td>
+          <td>{{ item.bairro|default:"—" }}</td>
+          <td>{{ item.documento|default:"—" }}</td>
+          <td>
+            {% if item.esta_ativo %}<span class="badge badge-ativo"><i class="bi bi-check-circle"></i> Ativo</span>
+            {% else %}<span class="badge badge-inativo"><i class="bi bi-slash-circle"></i> Inativo</span>{% endif %}
+          </td>
+          <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{% url 'inventario:detalhe' item.pk %}">Ver</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-inbox"></i> Nenhum item encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 {% if is_paginated %}
-<div class="acoes">
-  {% if page_obj.has_previous %}<a class="botao secundario pequeno" href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
-  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-  {% if page_obj.has_next %}<a class="botao secundario pequeno" href="?page={{ page_obj.next_page_number }}">Próxima</a>{% endif %}
-</div>
+<nav class="mt-3"><ul class="pagination justify-content-center">
+  <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+  <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+  <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a></li>
+</ul></nav>
 {% endif %}
 {% endblock %}

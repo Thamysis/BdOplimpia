@@ -1,30 +1,26 @@
 {% extends "base.html" %}
 {% block titulo %}Importação — OTO{% endblock %}
+{% block cabecalho %}Importação do Inventário{% endblock %}
+{% block nav_importacao %}ativo{% endblock %}
 {% block conteudo %}
-<h1>Importação do Inventário</h1>
-<p>Envie um arquivo (CSV, XLSX ou ODS) com a coluna <strong>nome</strong> obrigatória e,
-opcionalmente, <em>razao_social, tipo_documento, documento, endereco, bairro, latitude, longitude</em>.
-Ao enviar, o sistema mostra uma <strong>prévia</strong> com cada linha classificada como aceita
-ou rejeitada; nada é gravado até você confirmar.</p>
-
-<div class="cartao">
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div class="linha-form">
-      <label for="{{ form.arquivo.id_for_label }}">{{ form.arquivo.label }}</label>
-      {{ form.arquivo }}
-      {% for erro in form.arquivo.errors %}<div class="erro">{{ erro }}</div>{% endfor %}
-    </div>
-    <div class="linha-form">
-      <label for="{{ form.fonte.id_for_label }}">{{ form.fonte.label }}</label>
-      {{ form.fonte }}
-    </div>
-    <div class="acoes">
-      <button type="submit">Gerar prévia</button>
-      <a class="botao secundario" href="{% url 'importacao:importar_oficial' %}">Importar planilha oficial</a>
-      <a class="botao secundario" href="{% url 'importacao:historico' %}">Ver histórico</a>
-    </div>
-  </form>
+<div class="alert alert-light border">
+  <i class="bi bi-info-circle text-primary"></i>
+  Envie um arquivo (CSV, XLSX ou ODS) com a coluna <strong>nome</strong> obrigatória.
+  O sistema mostra uma <strong>prévia</strong> com cada linha classificada; nada é gravado até você confirmar.
+</div>
+<div class="card">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {% include "_campo.html" with campo=form.arquivo %}
+      {% include "_campo.html" with campo=form.fonte %}
+      <div class="d-flex flex-wrap gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-eye"></i> Gerar prévia</button>
+        <a class="btn btn-outline-primary" href="{% url 'importacao:importar_oficial' %}"><i class="bi bi-file-earmark-spreadsheet"></i> Importar planilha oficial</a>
+        <a class="btn btn-outline-secondary" href="{% url 'importacao:historico' %}"><i class="bi bi-clock-history"></i> Histórico</a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
