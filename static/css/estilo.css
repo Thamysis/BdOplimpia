@@ -1,163 +1,192 @@
+/* ============================================================
+   OTO — camada de tema sobre o Bootstrap 5
+   Paleta institucional (turismo/Prefeitura): verde + âmbar.
+   ============================================================ */
 :root {
-  --cor-primaria: #0b6e4f;
-  --cor-primaria-escura: #084d37;
-  --cor-destaque: #f2a900;
-  --cor-fundo: #f4f6f5;
-  --cor-texto: #1f2a28;
-  --cor-borda: #d6ddda;
-  --cor-erro: #b3261e;
-  --cor-ok: #1b7f3b;
-  --raio: 8px;
+  --oto-primaria: #0b6e4f;
+  --oto-primaria-escura: #084d37;
+  --oto-primaria-clara: #e7f3ee;
+  --oto-destaque: #f2a900;
+  --oto-sidebar-bg: #0c2a22;
+  --oto-sidebar-bg2: #0a3a2c;
+  --oto-texto: #1f2a28;
+  --oto-borda: #e3e9e6;
+  --oto-fundo: #f3f6f5;
+  --bs-primary: #0b6e4f;
 }
-
-* { box-sizing: border-box; }
 
 body {
-  margin: 0;
-  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background: var(--cor-fundo);
-  color: var(--cor-texto);
-  line-height: 1.5;
+  background: var(--oto-fundo);
+  color: var(--oto-texto);
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
 }
 
-a { color: var(--cor-primaria); }
+/* ---- Botões/links na cor da marca ---- */
+.btn-primary {
+  --bs-btn-bg: var(--oto-primaria);
+  --bs-btn-border-color: var(--oto-primaria);
+  --bs-btn-hover-bg: var(--oto-primaria-escura);
+  --bs-btn-hover-border-color: var(--oto-primaria-escura);
+  --bs-btn-active-bg: var(--oto-primaria-escura);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--oto-primaria);
+  --bs-btn-border-color: var(--oto-primaria);
+  --bs-btn-hover-bg: var(--oto-primaria);
+  --bs-btn-hover-border-color: var(--oto-primaria);
+}
+a { color: var(--oto-primaria); }
+.text-primary { color: var(--oto-primaria) !important; }
 
-header.topo {
-  background: var(--cor-primaria);
-  color: #fff;
-  padding: 0.75rem 1.25rem;
+/* ============================================================
+   Layout app (sidebar + conteúdo)
+   ============================================================ */
+.oto-app { display: flex; min-height: 100vh; }
+
+.oto-sidebar {
+  width: 256px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--oto-sidebar-bg), var(--oto-sidebar-bg2));
+  color: #cfe6dc;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
-header.topo .marca { font-weight: 700; font-size: 1.1rem; color: #fff; text-decoration: none; }
-header.topo nav { display: flex; gap: 0.25rem; flex-wrap: wrap; align-items: center; }
-header.topo nav a {
-  color: #fff;
+.oto-brand {
+  display: flex; align-items: center; gap: .7rem;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.oto-brand i { font-size: 1.6rem; color: var(--oto-destaque); }
+.oto-brand strong { display: block; color: #fff; font-size: 1.05rem; line-height: 1.1; }
+.oto-brand span { font-size: .72rem; color: #9ec7b8; }
+
+.oto-nav { padding: .75rem .6rem; display: flex; flex-direction: column; gap: .15rem; flex: 1; }
+.oto-nav a {
+  display: flex; align-items: center; gap: .7rem;
+  padding: .6rem .8rem;
+  color: #cfe6dc;
   text-decoration: none;
-  padding: 0.4rem 0.7rem;
-  border-radius: var(--raio);
-  font-size: 0.95rem;
+  border-radius: 9px;
+  font-size: .94rem;
+  transition: background .15s, color .15s;
 }
-header.topo nav a:hover { background: var(--cor-primaria-escura); }
-header.topo .usuario { font-size: 0.85rem; opacity: 0.95; }
+.oto-nav a i { font-size: 1.05rem; width: 1.2rem; text-align: center; }
+.oto-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+.oto-nav a.ativo { background: var(--oto-primaria); color: #fff; font-weight: 600; }
 
-main { max-width: 1100px; margin: 1.5rem auto; padding: 0 1.25rem; }
+.oto-sidebar-rodape {
+  padding: 1rem 1.25rem; font-size: .72rem; color: #78a596;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display: flex; flex-direction: column;
+}
 
-h1 { font-size: 1.5rem; margin-top: 0; }
-h2 { font-size: 1.2rem; }
+.oto-conteudo { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
-.cartao {
+.oto-topbar {
   background: #fff;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  padding: 1.25rem;
-  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--oto-borda);
+  padding: .7rem 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+  position: sticky; top: 0; z-index: 10;
+}
+.oto-topbar-titulo { font-weight: 700; font-size: 1.1rem; flex: 1; }
+
+.oto-perfil {
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--oto-primaria-clara); border: none; color: var(--oto-texto);
+}
+.oto-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--oto-primaria); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem;
+}
+.oto-badge-perfil { background: var(--oto-destaque); color: #3a2a00; font-weight: 600; }
+
+.oto-main { padding: 1.5rem; max-width: 1200px; width: 100%; }
+
+/* ---- Cartões e tabelas ---- */
+.card { border: 1px solid var(--oto-borda); border-radius: 12px; box-shadow: 0 1px 2px rgba(16,40,34,.04); }
+.card-header { background: #fff; border-bottom: 1px solid var(--oto-borda); font-weight: 600; }
+.table > :not(caption) > * > * { padding: .7rem .75rem; }
+.table thead th { background: #eef3f1; color: #3a4a45; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+
+/* ---- KPI / métricas ---- */
+.oto-kpi { display: flex; flex-direction: column; gap: .2rem; }
+.oto-kpi .valor { font-size: 2rem; font-weight: 800; color: var(--oto-primaria); line-height: 1; }
+.oto-kpi .rotulo { color: #5a6b66; font-size: .85rem; }
+.oto-kpi .icone {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--oto-primaria-clara); color: var(--oto-primaria);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem;
 }
 
-table { width: 100%; border-collapse: collapse; }
-th, td { text-align: left; padding: 0.6rem 0.7rem; border-bottom: 1px solid var(--cor-borda); }
-th { background: #eef2f0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.03em; }
-tr:hover td { background: #fafcfb; }
+/* ---- Badges de status ---- */
+.badge-ativo { background: #d8f1df; color: #1b7f3b; }
+.badge-inativo { background: #f6dcda; color: #b3261e; }
 
-.campo, input[type=text], input[type=email], input[type=password], input[type=number],
-input[type=date], select, textarea {
+/* ---- Gráfico de barras (relatórios) ---- */
+.oto-barra-status { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid var(--oto-borda); }
+.oto-barra-status .ativo { background: var(--oto-primaria); }
+.oto-barra-status .inativo { background: #c0392b; }
+.oto-barra-status > div { color: #fff; font-size: .8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.oto-grafico th[scope=row] { font-weight: 600; white-space: nowrap; }
+.oto-grafico .trilha { background: #eef3f1; border-radius: 6px; height: 22px; position: relative; min-width: 60px; }
+.oto-grafico .barra { background: var(--oto-primaria); height: 100%; border-radius: 6px; min-width: 2px; }
+
+/* ---- Login ---- */
+.oto-login-wrap {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--oto-sidebar-bg), var(--oto-primaria));
+  padding: 1.5rem;
+}
+.oto-login-card { width: 100%; max-width: 400px; }
+.oto-login-card .oto-login-logo {
+  width: 60px; height: 60px; border-radius: 16px; background: var(--oto-primaria-clara);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--oto-primaria);
+}
+
+/* ---- Responsivo ---- */
+@media (max-width: 991.98px) {
+  .oto-sidebar {
+    position: fixed; z-index: 1050; left: -260px; transition: left .25s;
+    box-shadow: 0 0 40px rgba(0,0,0,.3);
+  }
+  .oto-sidebar.aberta { left: 0; }
+}
+
+/* ---- Compatibilidade: inputs legados com classe .campo recebem visual Bootstrap ---- */
+.campo,
+form select,
+form textarea,
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="number"],
+form input[type="date"],
+form input[type="file"] {
+  display: block;
   width: 100%;
-  padding: 0.55rem 0.65rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  font-size: 0.95rem;
-  font-family: inherit;
+  padding: .5rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--oto-texto);
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: .5rem;
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
-
-label { font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 0.25rem; }
-.linha-form { margin-bottom: 1rem; }
-
-.botao, button, input[type=submit] {
-  display: inline-block;
-  background: var(--cor-primaria);
-  color: #fff;
-  border: none;
-  padding: 0.55rem 1rem;
-  border-radius: var(--raio);
-  font-size: 0.95rem;
-  cursor: pointer;
-  text-decoration: none;
+.campo:focus,
+form select:focus,
+form textarea:focus,
+form input:focus {
+  border-color: var(--oto-primaria);
+  outline: 0;
+  box-shadow: 0 0 0 .2rem rgba(11,110,79,.18);
 }
-.botao:hover, button:hover { background: var(--cor-primaria-escura); }
-.botao.secundario { background: #fff; color: var(--cor-primaria); border: 1px solid var(--cor-primaria); }
-.botao.perigo { background: var(--cor-erro); }
-.botao.pequeno { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
-
-.etiqueta { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
-.etiqueta.ativo { background: #d8f1df; color: var(--cor-ok); }
-.etiqueta.inativo { background: #f6dcda; color: var(--cor-erro); }
-.etiqueta.must { background: #fde3cf; color: #9a4b00; }
-
-.mensagens { list-style: none; padding: 0; margin: 0 0 1rem; }
-.mensagens li { padding: 0.7rem 1rem; border-radius: var(--raio); margin-bottom: 0.5rem; }
-.mensagens li.success { background: #d8f1df; color: var(--cor-ok); }
-.mensagens li.info { background: #d7e8f5; color: #0b4a73; }
-.mensagens li.error { background: #f6dcda; color: var(--cor-erro); }
-.mensagens li.warning { background: #fdf0d0; color: #7a5600; }
-
-.erro { color: var(--cor-erro); font-size: 0.85rem; }
-
-.grade-cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-.metric { font-size: 2rem; font-weight: 700; color: var(--cor-primaria); }
-
-.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; align-items: end; }
-
-.resumo-importacao { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
-.resumo-importacao .caixa { background: #eef2f0; border-radius: var(--raio); padding: 1rem; text-align: center; }
-.resumo-importacao .caixa .num { font-size: 1.8rem; font-weight: 700; }
-
-.acoes { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
-
-.tela-login { max-width: 360px; margin: 4rem auto; }
-
-@media (max-width: 640px) {
-  header.topo { flex-direction: column; align-items: flex-start; }
-  main { margin: 1rem auto; }
-}
-
-/* --- Relatórios / gráficos --- */
-.barra-status {
-  display: flex;
-  height: 36px;
-  border-radius: var(--raio);
-  overflow: hidden;
-  border: 1px solid var(--cor-borda);
-  margin-bottom: 0.75rem;
-}
-.barra-status .segmento-ativo { background: var(--cor-primaria); }
-.barra-status .segmento-inativo { background: var(--cor-erro); }
-.barra-status > div {
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  transition: width 0.3s ease;
-}
-.legenda { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; }
-.legenda.ativo { background: var(--cor-primaria); }
-.legenda.inativo { background: var(--cor-erro); }
-
-table.grafico-barras th[scope=row] { width: 220px; background: transparent; text-transform: none; letter-spacing: 0; font-weight: 600; }
-table.grafico-barras td.barra-cel { position: relative; }
-table.grafico-barras .barra {
-  display: inline-block;
-  height: 20px;
-  min-width: 2px;
-  background: var(--cor-primaria);
-  border-radius: 4px;
-  vertical-align: middle;
-  transition: width 0.3s ease;
-}
-table.grafico-barras .valor { margin-left: 0.5rem; font-size: 0.9rem; }
-table.grafico-barras .valor small { color: #5a6b66; }
+/* Checkboxes/radios não devem esticar */
+form input[type="checkbox"],
+form input[type="radio"] { width: auto; display: inline-block; }
