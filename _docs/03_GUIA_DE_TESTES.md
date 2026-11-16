@@ -5,7 +5,8 @@ e automatizado. Escrito para humanos e para agentes. Todos os comandos assumem a
 projeto (`/Users/enzopagotto/BdOplimpia`) e o Python do ambiente virtual (`.venv/bin/python`).
 
 > Resumo rápido: `migrate` → `seed_demo` → `runserver` → abrir `http://127.0.0.1:8000/`.
-> Testes: `.venv/bin/python manage.py test`. Hoje há **54 testes**, todos verdes.
+> Testes: `python manage.py test`. A suíte contém **66 testes**. Os cenários
+> funcionais e sua rastreabilidade estão na planilha em `outputs/oto-testes-2026-11-16/`.
 
 ---
 

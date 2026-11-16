@@ -91,9 +91,12 @@ das histórias e critérios de aceitação está em
 python manage.py test
 ```
 
-Os testes cobrem os critérios de aceitação de cada história (BDP01–BDP13) e as
+Os testes cobrem as histórias implementadas (BDP01–05 e BDP08–13) e as
 restrições de integridade do modelo. **Guia completo de execução e testes (passo a
 passo, todos os casos, manual e automatizado):** [`_docs/03_GUIA_DE_TESTES.md`](_docs/03_GUIA_DE_TESTES.md).
+A matriz de cenários funcionais, com pré-condições, passos, resultados esperados e
+o teste automatizado correspondente, está em
+[`outputs/oto-testes-2026-11-16/cenarios-de-teste-oto.xlsx`](outputs/oto-testes-2026-11-16/cenarios-de-teste-oto.xlsx).
 
 ## Integração contínua
 
