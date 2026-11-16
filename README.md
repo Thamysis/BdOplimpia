@@ -61,9 +61,11 @@ Senha para todas: `demo12345`
 - `/` — painel inicial
 - `/acesso/login/`, `/acesso/logout/`, `/acesso/usuarios/`
 - `/inventario/` — listagem/consulta; `/inventario/novo/`, `/inventario/<id>/`
+- `/inventario/catalogos/` — cadastrar segmentos, campos, CNAE e profissionais
 - `/inventario/relatorios/` — relatórios visuais (distribuição por status e por segmento)
 - `/importacao/` — importar com prévia (upload → prévia classificada → confirmar); `/importacao/historico/`
 - `/ods/` — indicadores ODS
+- `/ods/objetivos/novo/` — cadastrar objetivo ODS para associar aos indicadores
 - `/admin/` — Django admin (PT-BR) e `/health/` — verificação de saúde
 
 ### Formato de importação

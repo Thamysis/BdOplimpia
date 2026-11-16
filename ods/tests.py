@@ -142,6 +142,14 @@ class RegraCalculoBDP10Tests(BaseODSTests):
 
 
 class VinculosIndicadorTests(BaseODSTests):
+    def test_gestor_cria_objetivo_para_associar_ao_indicador(self):
+        self.assertEqual(self.client.get(reverse("ods:objetivo_novo")).status_code, 200)
+        resposta = self.client.post(reverse("ods:objetivo_novo"), {
+            "numero": 8, "nome": "Trabalho decente",
+        })
+        self.assertEqual(resposta.status_code, 302)
+        self.assertTrue(ODS.objects.filter(numero=8, nome="Trabalho decente").exists())
+
     def test_gestor_cria_e_edita_ods_e_itens_vinculados(self):
         ods = ODS.objects.create(numero=8, nome="Trabalho decente")
         item = ItemInventario.objects.create(nome="Hotel A")

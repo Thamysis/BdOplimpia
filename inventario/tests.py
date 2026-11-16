@@ -124,6 +124,28 @@ class DadosComplementaresTests(BaseInventarioTests):
         self.assertContains(detalhe, "12345")
 
 
+class CatalogosTests(BaseInventarioTests):
+    def test_operador_cria_dados_de_apoio_para_formulario_do_item(self):
+        self.assertEqual(self.client.get(reverse("inventario:catalogos")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("inventario:campo_novo")).status_code, 200)
+        self.assertEqual(self.client.post(reverse("inventario:segmento_novo"), {
+            "nome": "Eventos", "descricao": "Espaços de eventos",
+        }).status_code, 302)
+        segmento = Segmento.objects.get(nome="Eventos")
+        self.assertEqual(self.client.post(reverse("inventario:campo_novo"), {
+            "segmento": segmento.pk, "nome": "Capacidade", "tipo_dado": "numero",
+        }).status_code, 302)
+        self.assertEqual(self.client.post(reverse("inventario:cnae_novo"), {
+            "codigo": "8230-0/01", "descricao": "Eventos",
+        }).status_code, 302)
+        self.assertEqual(self.client.post(reverse("inventario:profissional_novo"), {
+            "nome": "Guia Ana", "cpf": "", "endereco": "Centro", "classificacao": "Guia",
+        }).status_code, 302)
+        self.assertTrue(CampoSegmento.objects.filter(segmento=segmento, nome="Capacidade").exists())
+        self.assertTrue(Cnae.objects.filter(codigo="8230-0/01").exists())
+        self.assertTrue(ProfissionalTurismo.objects.filter(nome="Guia Ana").exists())
+
+
 class ConsultaFiltroTests(BaseInventarioTests):
     """BDP04 — consultar e filtrar itens."""
 

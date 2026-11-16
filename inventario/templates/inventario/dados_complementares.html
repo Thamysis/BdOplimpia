@@ -4,6 +4,7 @@
 {% block nav_inventario %}ativo{% endblock %}
 {% block conteudo %}
 <p class="text-muted">{{ item.nome }} — edite os campos do segmento, contatos, Cadastur e vínculos.</p>
+<p><a href="{% url 'inventario:catalogos' %}">Cadastrar segmento, campo, CNAE ou profissional</a> antes de vinculá-los.</p>
 <form method="post">
   {% csrf_token %}
   <div class="card mb-3"><div class="card-header">Campos e vínculos</div><div class="card-body">

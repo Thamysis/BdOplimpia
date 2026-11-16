@@ -5,6 +5,7 @@
 {% block conteudo %}
 <div class="card">
   <div class="card-body">
+    <p><a href="{% url 'ods:objetivo_novo' %}">Cadastrar um objetivo ODS</a> para associá-lo ao indicador.</p>
     <form method="post">
       {% csrf_token %}
       {{ form.non_field_errors }}

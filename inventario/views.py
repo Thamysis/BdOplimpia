@@ -19,7 +19,9 @@ from auditoria.services import (
 )
 
 from .forms import CadasturItemFormSet, ContatoItemFormSet, DadosComplementaresForm, ItemInventarioForm
-from .models import ItemInventario, Participa, Segmento, StatusItem
+from .models import (
+    CampoSegmento, Cnae, ItemInventario, Participa, ProfissionalTurismo, Segmento, StatusItem,
+)
 
 
 class ItemListView(LoginRequiredMixin, ListView):
@@ -202,6 +204,47 @@ class DadosComplementaresView(EditaInventarioRequiredMixin, View):
                 registrar_relacao(item, campo, anterior[campo], atual[campo], usuario=request.user)
         messages.success(request, "Dados complementares atualizados.")
         return redirect("inventario:detalhe", pk=item.pk)
+
+
+class CatalogosView(EditaInventarioRequiredMixin, TemplateView):
+    template_name = "inventario/catalogos.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["segmentos"] = Segmento.objects.all()
+        ctx["campos"] = CampoSegmento.objects.select_related("segmento")
+        ctx["cnaes"] = Cnae.objects.all()
+        ctx["profissionais"] = ProfissionalTurismo.objects.all()
+        return ctx
+
+
+class CadastroCatalogoMixin(EditaInventarioRequiredMixin):
+    template_name = "inventario/catalogo_form.html"
+    success_url = reverse_lazy("inventario:catalogos")
+
+
+class SegmentoCreateView(CadastroCatalogoMixin, CreateView):
+    model = Segmento
+    fields = ["nome", "descricao"]
+    titulo = "Novo segmento"
+
+
+class CampoSegmentoCreateView(CadastroCatalogoMixin, CreateView):
+    model = CampoSegmento
+    fields = ["segmento", "nome", "tipo_dado", "obrigatorio"]
+    titulo = "Novo campo de segmento"
+
+
+class CnaeCreateView(CadastroCatalogoMixin, CreateView):
+    model = Cnae
+    fields = ["codigo", "descricao"]
+    titulo = "Nova atividade CNAE"
+
+
+class ProfissionalCreateView(CadastroCatalogoMixin, CreateView):
+    model = ProfissionalTurismo
+    fields = ["nome", "cpf", "endereco", "classificacao"]
+    titulo = "Novo profissional"
 
 
 class RelatoriosView(LoginRequiredMixin, TemplateView):

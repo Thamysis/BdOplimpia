@@ -3,6 +3,7 @@
 {% block cabecalho %}Inventário Turístico{% endblock %}
 {% block nav_inventario %}ativo{% endblock %}
 {% block conteudo %}
+{% if user.pode_editar_inventario %}<div class="mb-3"><a href="{% url 'inventario:catalogos' %}">Cadastros de apoio</a></div>{% endif %}
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <p class="text-muted mb-0">Consulte e filtre os itens do trade turístico.</p>

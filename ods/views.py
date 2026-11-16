@@ -7,7 +7,7 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, V
 from acesso.permissions import ConsultaIndicadoresRequiredMixin, RegistraPesquisaRequiredMixin
 
 from .forms import DadoPesquisaForm, IndicadorODSForm
-from .models import IndicadorODS, MedicaoIndicador
+from .models import IndicadorODS, MedicaoIndicador, ODS
 
 
 class IndicadorListView(ConsultaIndicadoresRequiredMixin, ListView):
@@ -38,6 +38,13 @@ class IndicadorUpdateView(ConsultaIndicadoresRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse("ods:indicador_detalhe", args=[self.object.pk])
+
+
+class ODSCreateView(ConsultaIndicadoresRequiredMixin, CreateView):
+    model = ODS
+    fields = ["numero", "nome"]
+    template_name = "ods/objetivo_form.html"
+    success_url = reverse_lazy("ods:indicador_lista")
 
 
 class IndicadorDetailView(ConsultaIndicadoresRequiredMixin, DetailView):
