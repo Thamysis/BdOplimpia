@@ -9,6 +9,7 @@ Cadastur e chave composta de Preenchimento).
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.conf import settings
 
 
 class StatusItem(models.TextChoices):
@@ -122,6 +123,34 @@ class ItemInventario(models.Model):
     def esta_ativo(self) -> bool:
         return self.status == StatusItem.ATIVO
 
+class Gerencia(models.Model):
+    """Vínculo entre usuário e itens do inventário que ele pode gerenciar."""
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="gerencias",
+        verbose_name="Usuário",
+    )
+    item = models.ForeignKey(
+        ItemInventario,
+        on_delete=models.CASCADE,
+        related_name="gerencias",
+        verbose_name="Item",
+    )
+
+    class Meta:
+        verbose_name = "Gerência de item"
+        verbose_name_plural = "Gerências de itens"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["usuario", "item"],
+                name="gerencia_usuario_item_unico",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.usuario} → {self.item}"
 
 class Participa(models.Model):
     """Vínculo Item <-> Segmento, com classificação opcional no segmento."""

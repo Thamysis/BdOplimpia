@@ -12,6 +12,7 @@ from .models import (
     Cadastur,
     Cnae,
     Contato,
+    Gerencia,
     ItemInventario,
     Participa,
     Preenchimento,
@@ -245,6 +246,18 @@ class RestricoesModeloTests(TestCase):
         Participa.objects.create(item=item, segmento=seg)
         preench = Preenchimento(item=item, campo=campo, valor="100")
         preench.clean()  # não deve levantar
+
+    def test_gerencia_nao_permite_usuario_item_duplicado(self):
+        usuario = Usuario.objects.create_user(
+            "empresa", password="x", perfil=Perfil.OPERADOR
+        )
+        item = ItemInventario.objects.create(nome="Hotel Gerenciado")
+
+        Gerencia.objects.create(usuario=usuario, item=item)
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Gerencia.objects.create(usuario=usuario, item=item)
 
 
 class RelatoriosTests(BaseInventarioTests):
