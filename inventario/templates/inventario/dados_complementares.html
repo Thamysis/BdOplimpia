@@ -15,7 +15,9 @@
     {{ contatos_formset.management_form }}{{ contatos_formset.non_form_errors }}
     {% for linha in contatos_formset %}
       <div class="row border-bottom mb-2 pb-2">
-        {% for campo in linha %}<div class="col-md-3">{% include "_campo.html" with campo=campo %}</div>{% endfor %}
+        {% for campo in linha %}
+          {% if campo.is_hidden %}{{ campo }}{% else %}<div class="col-md-3">{% include "_campo.html" with campo=campo %}</div>{% endif %}
+        {% endfor %}
       </div>
     {% endfor %}
   </div></div>
@@ -23,7 +25,9 @@
     {{ cadastur_formset.management_form }}{{ cadastur_formset.non_form_errors }}
     {% for linha in cadastur_formset %}
       <div class="row border-bottom mb-2 pb-2">
-        {% for campo in linha %}<div class="col-md-3">{% include "_campo.html" with campo=campo %}</div>{% endfor %}
+        {% for campo in linha %}
+          {% if campo.is_hidden %}{{ campo }}{% else %}<div class="col-md-3">{% include "_campo.html" with campo=campo %}</div>{% endif %}
+        {% endfor %}
       </div>
     {% endfor %}
   </div></div>
