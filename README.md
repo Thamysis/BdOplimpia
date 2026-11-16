@@ -42,6 +42,7 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 python manage.py migrate
 python manage.py seed_demo        # dados de demonstração (opcional)
+python manage.py seed_apresentacao # exemplos fictícios mais completos (opcional)
 python manage.py createsuperuser  # ou use as contas do seed_demo
 python manage.py runserver
 ```
@@ -55,6 +56,12 @@ Senha para todas: `demo12345`
 - `admin_oto` (administrador) — também é superusuário do `/admin/`
 - `operador_oto` (operador)
 - `gestor_oto` (gestor)
+
+Para apresentar o sistema, `seed_apresentacao` acrescenta 12 itens marcados
+`[Demo]`, incluindo dois inativos, contatos, Cadastur fictício, histórico,
+pesquisas e indicadores ODS. O comando pode ser executado novamente sem
+duplicar esses exemplos. Os dados são inventados para demonstração e não
+representam estabelecimentos da planilha oficial.
 
 ### Rotas principais
 
