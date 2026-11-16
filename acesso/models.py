@@ -60,6 +60,10 @@ class Usuario(AbstractUser):
         """Gestor e administrador consultam indicadores ODS."""
         return self.eh_gestor
 
+    def pode_registrar_pesquisa(self) -> bool:
+        """Operador, gestor e administrador registram dados de pesquisa (BDP09)."""
+        return self.eh_operador or self.eh_gestor
+
     def pode_importar(self) -> bool:
         """Importação do Inventário é feita pelo administrador."""
         return self.eh_administrador

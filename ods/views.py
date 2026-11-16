@@ -2,9 +2,9 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, DetailView, ListView, View
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 
-from acesso.permissions import ConsultaIndicadoresRequiredMixin
+from acesso.permissions import ConsultaIndicadoresRequiredMixin, RegistraPesquisaRequiredMixin
 
 from .forms import DadoPesquisaForm, IndicadorODSForm
 from .models import IndicadorODS, MedicaoIndicador
@@ -31,6 +31,15 @@ class IndicadorCreateView(ConsultaIndicadoresRequiredMixin, CreateView):
         return reverse("ods:indicador_detalhe", args=[self.object.pk])
 
 
+class IndicadorUpdateView(ConsultaIndicadoresRequiredMixin, UpdateView):
+    model = IndicadorODS
+    form_class = IndicadorODSForm
+    template_name = "ods/indicador_form.html"
+
+    def get_success_url(self):
+        return reverse("ods:indicador_detalhe", args=[self.object.pk])
+
+
 class IndicadorDetailView(ConsultaIndicadoresRequiredMixin, DetailView):
     """BDP12 — histórico de medições ordenado por período (asc)."""
 
@@ -46,7 +55,7 @@ class IndicadorDetailView(ConsultaIndicadoresRequiredMixin, DetailView):
         return ctx
 
 
-class DadoPesquisaCreateView(ConsultaIndicadoresRequiredMixin, CreateView):
+class DadoPesquisaCreateView(RegistraPesquisaRequiredMixin, CreateView):
     """BDP09 — registro de dado de pesquisa (indicador obrigatório)."""
 
     model = IndicadorODS
@@ -56,7 +65,9 @@ class DadoPesquisaCreateView(ConsultaIndicadoresRequiredMixin, CreateView):
     def form_valid(self, form):
         self.dado = form.save()
         messages.success(self.request, "Dado de pesquisa registrado.")
-        return redirect("ods:indicador_detalhe", pk=self.dado.indicador_id)
+        if self.request.user.pode_consultar_indicadores():
+            return redirect("ods:indicador_detalhe", pk=self.dado.indicador_id)
+        return redirect("painel")
 
 
 class CalcularMedicaoView(ConsultaIndicadoresRequiredMixin, View):

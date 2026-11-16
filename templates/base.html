@@ -36,6 +36,9 @@
       <a href="{% url 'ods:indicador_lista' %}" class="{% block nav_ods %}{% endblock %}">
         <i class="bi bi-globe-americas"></i> Indicadores ODS</a>
       {% endif %}
+      {% if user.pode_registrar_pesquisa and not user.pode_consultar_indicadores %}
+      <a href="{% url 'ods:dado_pesquisa_novo' %}"><i class="bi bi-clipboard-data"></i> Registrar pesquisa</a>
+      {% endif %}
       {% if user.pode_gerenciar_usuarios %}
       <a href="{% url 'acesso:usuario_lista' %}" class="{% block nav_usuarios %}{% endblock %}">
         <i class="bi bi-people"></i> Usuários</a>

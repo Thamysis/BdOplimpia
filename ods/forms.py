@@ -1,9 +1,43 @@
 from django import forms
+from django.db import transaction
 
-from .models import DadoPesquisaODS, IndicadorODS
+from inventario.models import ItemInventario
+
+from .models import DadoPesquisaODS, IndicadorODS, ODS, ODSIndicador, VinculoInventarioIndicador
 
 
 class IndicadorODSForm(forms.ModelForm):
+    objetivos = forms.ModelMultipleChoiceField(
+        queryset=ODS.objects.all(), required=False, label="Objetivos ODS",
+        widget=forms.CheckboxSelectMultiple,
+    )
+    itens = forms.ModelMultipleChoiceField(
+        queryset=ItemInventario.objects.all(), required=False,
+        label="Itens do Inventário vinculados", widget=forms.SelectMultiple,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields["objetivos"].initial = self.instance.ods.all()
+            self.fields["itens"].initial = ItemInventario.objects.filter(
+                indicadores_vinculados__indicador=self.instance
+            )
+
+    @transaction.atomic
+    def save(self, commit=True):
+        indicador = super().save(commit=commit)
+        if commit:
+            objetivos = set(self.cleaned_data["objetivos"].values_list("pk", flat=True))
+            itens = set(self.cleaned_data["itens"].values_list("pk", flat=True))
+            ODSIndicador.objects.filter(indicador=indicador).exclude(ods_id__in=objetivos).delete()
+            VinculoInventarioIndicador.objects.filter(indicador=indicador).exclude(item_id__in=itens).delete()
+            for pk in objetivos:
+                ODSIndicador.objects.get_or_create(indicador=indicador, ods_id=pk)
+            for pk in itens:
+                VinculoInventarioIndicador.objects.get_or_create(indicador=indicador, item_id=pk)
+        return indicador
+
     class Meta:
         model = IndicadorODS
         fields = [

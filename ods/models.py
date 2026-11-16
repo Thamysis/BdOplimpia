@@ -75,6 +75,10 @@ class IndicadorODS(models.Model):
                 valor=self.regra_valor,
                 item__status=StatusItem.ATIVO,
             )
+            # Quando há vínculos explícitos, a medição pertence apenas a esses itens.
+            vinculados = self.itens_vinculados.values("item_id")
+            if vinculados.exists():
+                qs = qs.filter(item_id__in=vinculados)
             return float(qs.values("item").distinct().count())
         # Regra manual: soma dos valores dos dados de pesquisa.
         total = self.dados_pesquisa.aggregate(s=models.Sum("valor"))["s"]

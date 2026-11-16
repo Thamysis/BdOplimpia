@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block titulo %}Indicador ODS — OTO{% endblock %}
-{% block cabecalho %}Novo indicador ODS{% endblock %}
+{% block cabecalho %}{% if object %}Editar indicador ODS{% else %}Novo indicador ODS{% endif %}{% endblock %}
 {% block nav_ods %}ativo{% endblock %}
 {% block conteudo %}
 <div class="card">

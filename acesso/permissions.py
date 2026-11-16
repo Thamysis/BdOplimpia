@@ -38,3 +38,7 @@ class ImportaRequiredMixin(PerfilRequiredMixin):
 
 class ConsultaIndicadoresRequiredMixin(PerfilRequiredMixin):
     verificacao = "pode_consultar_indicadores"
+
+
+class RegistraPesquisaRequiredMixin(PerfilRequiredMixin):
+    verificacao = "pode_registrar_pesquisa"

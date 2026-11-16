@@ -18,6 +18,7 @@ from .models import (
     DadoPesquisaODS,
     IndicadorODS,
     MedicaoIndicador,
+    ODS,
     RegraCalculo,
     VinculoInventarioIndicador,
 )
@@ -81,6 +82,18 @@ class DadoPesquisaBDP09Tests(BaseODSTests):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(DadoPesquisaODS.objects.count(), 0)
 
+    def test_operador_registra_dado_sem_acesso_ao_cadastro_de_indicador(self):
+        operador = Usuario.objects.create_user("operador", password="x", perfil=Perfil.OPERADOR)
+        indicador = IndicadorODS.objects.create(nome="Demanda")
+        self.client.force_login(operador)
+        self.assertEqual(self.client.get(reverse("ods:dado_pesquisa_novo")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("ods:indicador_novo")).status_code, 403)
+        resp = self.client.post(reverse("ods:dado_pesquisa_novo"), {
+            "indicador": indicador.pk, "data_referencia": "2026-01-01", "valor": "12",
+        })
+        self.assertRedirects(resp, reverse("painel"))
+        self.assertEqual(indicador.dados_pesquisa.count(), 1)
+
 
 class RegraCalculoBDP10Tests(BaseODSTests):
     def test_conta_itens_ativos_com_campo_sustentabilidade_sim(self):
@@ -102,6 +115,7 @@ class RegraCalculoBDP10Tests(BaseODSTests):
             regra_valor="Sim",
         )
         VinculoInventarioIndicador.objects.create(indicador=indicador, item=ativo)
+        VinculoInventarioIndicador.objects.create(indicador=indicador, item=inativo)
 
         # 1 ativo + 1 inativo com o valor => resultado deve ser 1 (só ativos).
         self.assertEqual(indicador.calcular(), 1.0)
@@ -110,6 +124,43 @@ class RegraCalculoBDP10Tests(BaseODSTests):
         inativo.status = StatusItem.ATIVO
         inativo.save()
         self.assertEqual(indicador.calcular(), 2.0)
+
+    def test_regra_com_vinculos_ignora_item_nao_vinculado(self):
+        seg = Segmento.objects.create(nome="Hospedagem")
+        campo = CampoSegmento.objects.create(segmento=seg, nome="sustentabilidade")
+        vincul = ItemInventario.objects.create(nome="Hotel vinculado")
+        outro = ItemInventario.objects.create(nome="Hotel externo")
+        for item in (vincul, outro):
+            Participa.objects.create(item=item, segmento=seg)
+            Preenchimento.objects.create(item=item, campo=campo, valor="Sim")
+        indicador = IndicadorODS.objects.create(
+            nome="Vinculados sustentáveis", regra_calculo=RegraCalculo.CONTAR_ITENS_CAMPO,
+            regra_campo="sustentabilidade", regra_valor="Sim",
+        )
+        VinculoInventarioIndicador.objects.create(indicador=indicador, item=vincul)
+        self.assertEqual(indicador.calcular(), 1.0)
+
+
+class VinculosIndicadorTests(BaseODSTests):
+    def test_gestor_cria_e_edita_ods_e_itens_vinculados(self):
+        ods = ODS.objects.create(numero=8, nome="Trabalho decente")
+        item = ItemInventario.objects.create(nome="Hotel A")
+        outro = ItemInventario.objects.create(nome="Hotel B")
+        resp = self.client.post(reverse("ods:indicador_novo"), {
+            "nome": "Empregos", "regra_calculo": RegraCalculo.MANUAL,
+            "objetivos": [ods.pk], "itens": [item.pk],
+        })
+        self.assertEqual(resp.status_code, 302)
+        indicador = IndicadorODS.objects.get(nome="Empregos")
+        self.assertEqual(list(indicador.ods.all()), [ods])
+        self.assertEqual(list(indicador.itens_vinculados.values_list("item_id", flat=True)), [item.pk])
+        resp = self.client.post(reverse("ods:indicador_editar", args=[indicador.pk]), {
+            "nome": "Empregos", "regra_calculo": RegraCalculo.MANUAL,
+            "itens": [outro.pk],
+        })
+        self.assertEqual(resp.status_code, 302)
+        self.assertFalse(indicador.ods.exists())
+        self.assertEqual(list(indicador.itens_vinculados.values_list("item_id", flat=True)), [outro.pk])
 
 
 class HistoricoBDP12Tests(BaseODSTests):
