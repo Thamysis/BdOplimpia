@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.db.models import Count, Q
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     CreateView,
@@ -13,10 +14,27 @@ from django.views.generic import (
 )
 
 from acesso.permissions import EditaInventarioRequiredMixin
-from auditoria.services import registrar_criacao, registrar_edicao, snapshot
+from auditoria.services import registrar_criacao, registrar_edicao, registrar_relacao, snapshot
 
-from .forms import ItemInventarioForm
+from .forms import CadasturItemFormSet, ContatoItemFormSet, DadosComplementaresForm, ItemInventarioForm
 from .models import ItemInventario, Participa, Segmento, StatusItem
+
+
+def _resumo_complementos(item):
+    return {
+        "campos de segmento": "; ".join(sorted(
+            f"{p.campo.nome}: {p.valor}" for p in item.preenchimentos.select_related("campo")
+        )),
+        "contatos": "; ".join(sorted(
+            f"{c.tipo}: {c.valor} ({c.finalidade})" for c in item.contato_set.all()
+        )),
+        "Cadastur": "; ".join(sorted(
+            f"{c.numero}: {c.tipo}, {c.situacao}, {c.vencimento or ''}"
+            for c in item.cadastur_set.all()
+        )),
+        "CNAE": "; ".join(sorted(item.atividades.values_list("codigo", flat=True))),
+        "profissionais": "; ".join(sorted(item.profissionais.values_list("nome", flat=True))),
+    }
 
 
 class ItemListView(LoginRequiredMixin, ListView):
@@ -68,6 +86,11 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx["historico"] = self.object.historico.all()
         ctx["segmentos_item"] = Segmento.objects.filter(participa__item=self.object)
+        ctx["preenchimentos"] = self.object.preenchimentos.select_related("campo", "campo__segmento")
+        ctx["contatos"] = self.object.contato_set.all()
+        ctx["cadastur"] = self.object.cadastur_set.all()
+        ctx["cnaes"] = self.object.atividades.all()
+        ctx["profissionais"] = self.object.profissionais.all()
         return ctx
 
 
@@ -107,8 +130,18 @@ class ItemUpdateView(EditaInventarioRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         anterior = snapshot(self.get_object())
+        segmentos_antes = ", ".join(sorted(
+            Segmento.objects.filter(participa__item=self.object).values_list("nome", flat=True)
+        ))
         response = super().form_valid(form)
         registrar_edicao(self.object, anterior, usuario=self.request.user)
+        segmentos_depois = ", ".join(sorted(
+            Segmento.objects.filter(participa__item=self.object).values_list("nome", flat=True)
+        ))
+        registrar_relacao(
+            self.object, "segmentos", segmentos_antes, segmentos_depois,
+            usuario=self.request.user,
+        )
         messages.success(self.request, "Item atualizado com sucesso.")
         return response
 
@@ -145,6 +178,45 @@ class ItemReativarView(EditaInventarioRequiredMixin, View):
             registrar_edicao(item, anterior, usuario=request.user)
             messages.info(request, f"Item '{item.nome}' reativado.")
         return redirect("inventario:detalhe", pk=pk)
+
+
+class DadosComplementaresView(EditaInventarioRequiredMixin, View):
+    """Edita os dados do Inventário que dependem do segmento e seus vínculos."""
+
+    template_name = "inventario/dados_complementares.html"
+
+    def _formularios(self, item, dados=None):
+        return (
+            DadosComplementaresForm(dados, item=item),
+            ContatoItemFormSet(dados, instance=item, prefix="contatos"),
+            CadasturItemFormSet(dados, instance=item, prefix="cadastur"),
+        )
+
+    def _render(self, request, item, form, contatos, cadastur):
+        return render(request, self.template_name, {
+            "item": item, "form": form, "contatos_formset": contatos,
+            "cadastur_formset": cadastur,
+        })
+
+    def get(self, request, pk):
+        item = get_object_or_404(ItemInventario, pk=pk)
+        return self._render(request, item, *self._formularios(item))
+
+    def post(self, request, pk):
+        item = get_object_or_404(ItemInventario, pk=pk)
+        form, contatos, cadastur = self._formularios(item, request.POST)
+        if not all((form.is_valid(), contatos.is_valid(), cadastur.is_valid())):
+            return self._render(request, item, form, contatos, cadastur)
+        with transaction.atomic():
+            anterior = _resumo_complementos(item)
+            form.save()
+            contatos.save()
+            cadastur.save()
+            atual = _resumo_complementos(item)
+            for campo in anterior:
+                registrar_relacao(item, campo, anterior[campo], atual[campo], usuario=request.user)
+        messages.success(request, "Dados complementares atualizados.")
+        return redirect("inventario:detalhe", pk=item.pk)
 
 
 class RelatoriosView(LoginRequiredMixin, TemplateView):

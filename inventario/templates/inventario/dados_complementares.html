@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Dados complementares — {{ item.nome }}{% endblock %}
+{% block cabecalho %}Dados complementares do Inventário{% endblock %}
+{% block nav_inventario %}ativo{% endblock %}
+{% block conteudo %}
+<p class="text-muted">{{ item.nome }} — edite os campos do segmento, contatos, Cadastur e vínculos.</p>
+<form method="post">
+  {% csrf_token %}
+  <div class="card mb-3"><div class="card-header">Campos e vínculos</div><div class="card-body">
+    {{ form.non_field_errors }}
+    {% for campo in form %}{% include "_campo.html" with campo=campo %}{% endfor %}
+  </div></div>
+  <div class="card mb-3"><div class="card-header">Contatos</div><div class="card-body">
+    {{ contatos_formset.management_form }}{{ contatos_formset.non_form_errors }}
+    {% for linha in contatos_formset %}
+      <div class="row border-bottom mb-2 pb-2">
+        {% for campo in linha %}<div class="col-md-3">{% include "_campo.html" with campo=campo %}</div>{% endfor %}
+      </div>
+    {% endfor %}
+  </div></div>
+  <div class="card mb-3"><div class="card-header">Cadastur</div><div class="card-body">
+    {{ cadastur_formset.management_form }}{{ cadastur_formset.non_form_errors }}
+    {% for linha in cadastur_formset %}
+      <div class="row border-bottom mb-2 pb-2">
+        {% for campo in linha %}<div class="col-md-3">{% include "_campo.html" with campo=campo %}</div>{% endfor %}
+      </div>
+    {% endfor %}
+  </div></div>
+  <button type="submit" class="btn btn-primary">Salvar dados</button>
+  <a class="btn btn-outline-secondary" href="{% url 'inventario:detalhe' item.pk %}">Cancelar</a>
+</form>
+{% endblock %}

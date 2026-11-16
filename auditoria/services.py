@@ -68,3 +68,13 @@ def registrar_edicao(item: ItemInventario, anterior: dict, usuario=None):
 def snapshot(item: ItemInventario) -> dict:
     """Captura o estado atual dos campos monitorados."""
     return {campo: getattr(item, campo) for campo in CAMPOS_MONITORADOS}
+
+
+def registrar_relacao(item: ItemInventario, campo: str, anterior, atual, usuario=None):
+    """Registra alterações de vínculos e dados complementares do Inventário."""
+    if anterior == atual:
+        return None
+    return AlteracaoInventario.objects.create(
+        usuario=usuario, item=item, acao=AcaoAuditoria.EDICAO,
+        campo_alterado=campo, valor_anterior=str(anterior), valor_novo=str(atual),
+    )

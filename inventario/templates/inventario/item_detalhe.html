@@ -15,6 +15,7 @@
   {% if user.pode_editar_inventario %}
   <div class="d-flex gap-2">
     <a class="btn btn-outline-primary" href="{% url 'inventario:editar' item.pk %}"><i class="bi bi-pencil"></i> Editar</a>
+    <a class="btn btn-outline-primary" href="{% url 'inventario:dados_complementares' item.pk %}">Dados complementares</a>
     {% if item.esta_ativo %}
     <form method="post" action="{% url 'inventario:inativar' item.pk %}">{% csrf_token %}
       <button class="btn btn-outline-danger" type="submit"><i class="bi bi-slash-circle"></i> Inativar</button></form>
@@ -67,5 +68,24 @@
       </div>
     </div>
   </div>
+</div>
+<div class="row g-3 mt-1">
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header">Campos por segmento</div><div class="card-body small">
+    {% for p in preenchimentos %}<div><strong>{{ p.campo.segmento.nome }} / {{ p.campo.nome }}:</strong> {{ p.valor }}</div>
+    {% empty %}<span class="text-muted">Nenhum campo preenchido.</span>{% endfor %}
+  </div></div></div>
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header">Contatos e Cadastur</div><div class="card-body small">
+    {% for c in contatos %}<div>{{ c.tipo }}: {{ c.valor }}</div>{% endfor %}
+    {% for c in cadastur %}<div>Cadastur {{ c.numero }} — {{ c.situacao }}</div>{% endfor %}
+    {% if not contatos and not cadastur %}<span class="text-muted">Nenhum registro.</span>{% endif %}
+  </div></div></div>
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header">CNAE</div><div class="card-body small">
+    {% for c in cnaes %}<div>{{ c.codigo }} — {{ c.descricao }}</div>
+    {% empty %}<span class="text-muted">Nenhuma atividade vinculada.</span>{% endfor %}
+  </div></div></div>
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header">Profissionais vinculados</div><div class="card-body small">
+    {% for p in profissionais %}<div>{{ p.nome }}</div>
+    {% empty %}<span class="text-muted">Nenhum profissional vinculado.</span>{% endfor %}
+  </div></div></div>
 </div>
 {% endblock %}

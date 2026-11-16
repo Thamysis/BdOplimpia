@@ -9,9 +9,13 @@ from auditoria.models import AcaoAuditoria, AlteracaoInventario
 
 from .models import (
     CampoSegmento,
+    Cadastur,
+    Cnae,
+    Contato,
     ItemInventario,
     Participa,
     Preenchimento,
+    ProfissionalTurismo,
     Segmento,
     StatusItem,
 )
@@ -76,6 +80,48 @@ class EdicaoItemTests(BaseInventarioTests):
         )
         item.refresh_from_db()
         self.assertEqual(item.bairro, "Centro")
+
+    def test_alteracao_de_segmentos_e_auditada(self):
+        item = ItemInventario.objects.create(nome="Hotel")
+        Participa.objects.create(item=item, segmento=self.hospedagem)
+        resposta = self.client.post(reverse("inventario:editar", args=[item.pk]), {
+            "nome": "Hotel", "segmentos": [self.alimentacao.pk],
+        })
+        self.assertEqual(resposta.status_code, 302)
+        registro = AlteracaoInventario.objects.get(item=item, campo_alterado="segmentos")
+        self.assertIn("Hospedagem", registro.valor_anterior)
+        self.assertIn("Alimentação", registro.valor_novo)
+
+
+class DadosComplementaresTests(BaseInventarioTests):
+    def test_edita_campos_contato_cadastur_e_vinculos_com_auditoria(self):
+        item = ItemInventario.objects.create(nome="Hotel completo")
+        Participa.objects.create(item=item, segmento=self.hospedagem)
+        campo = CampoSegmento.objects.create(segmento=self.hospedagem, nome="Leitos", tipo_dado="numero")
+        cnae = Cnae.objects.create(codigo="5510-8/01", descricao="Hotéis")
+        profissional = ProfissionalTurismo.objects.create(nome="Guia Maria")
+        url = reverse("inventario:dados_complementares", args=[item.pk])
+        self.assertEqual(self.client.get(url).status_code, 200)
+        resposta = self.client.post(url, {
+            f"campo_{campo.pk}": "120", "cnaes": [cnae.pk],
+            "profissionais": [profissional.pk],
+            "contatos-TOTAL_FORMS": "1", "contatos-INITIAL_FORMS": "0",
+            "contatos-MIN_NUM_FORMS": "0", "contatos-MAX_NUM_FORMS": "1000",
+            "contatos-0-tipo": "telefone", "contatos-0-valor": "(17) 3000-0000",
+            "cadastur-TOTAL_FORMS": "1", "cadastur-INITIAL_FORMS": "0",
+            "cadastur-MIN_NUM_FORMS": "0", "cadastur-MAX_NUM_FORMS": "1000",
+            "cadastur-0-numero": "12345", "cadastur-0-tipo": "Hotel",
+        })
+        self.assertEqual(resposta.status_code, 302)
+        self.assertEqual(Preenchimento.objects.get(item=item, campo=campo).valor, "120")
+        self.assertEqual(Contato.objects.get(item=item).valor, "(17) 3000-0000")
+        self.assertEqual(Cadastur.objects.get(item=item).numero, "12345")
+        self.assertTrue(item.atividades.filter(pk=cnae.pk).exists())
+        self.assertTrue(item.profissionais.filter(pk=profissional.pk).exists())
+        self.assertTrue(AlteracaoInventario.objects.filter(item=item, campo_alterado="contatos").exists())
+        detalhe = self.client.get(reverse("inventario:detalhe", args=[item.pk]))
+        self.assertContains(detalhe, "Leitos")
+        self.assertContains(detalhe, "12345")
 
 
 class ConsultaFiltroTests(BaseInventarioTests):
