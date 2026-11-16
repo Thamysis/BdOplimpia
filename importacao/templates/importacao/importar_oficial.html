@@ -1,14 +1,13 @@
 {% extends "base.html" %}
 {% block titulo %}Importar planilha oficial — OTO{% endblock %}
-{% block cabecalho %}Importar aba da planilha oficial{% endblock %}
+{% block cabecalho %}Importar planilha oficial{% endblock %}
 {% block nav_importacao %}ativo{% endblock %}
 {% block conteudo %}
 <div class="alert alert-light border">
   <i class="bi bi-info-circle text-primary"></i>
-  Para a planilha <strong>INVENTARIO OFICIAL OLIMPIA</strong>, exporte uma aba de categoria
-  (ex.: Meios de Hospedagem) como CSV/XLSX e envie aqui, informando o segmento. O sistema detecta
-  o cabeçalho, extrai campos-base, contatos, Cadastur e CNAE, e registra as demais colunas como
-  campos específicos do segmento.
+  Envie a planilha oficial XLSX/ODS completa para reconhecer todas as abas de categoria.
+  Para importar uma única aba ou um CSV, informe o nome do segmento. O sistema mostrará
+  uma prévia antes de gravar os itens.
 </div>
 <div class="card">
   <div class="card-body">
@@ -17,7 +16,7 @@
       {{ form.non_field_errors }}
       {% for campo in form %}{% include "_campo.html" with campo=campo %}{% endfor %}
       <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Importar aba</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Gerar prévia</button>
         <a class="btn btn-outline-secondary" href="{% url 'importacao:importar' %}">Importação genérica</a>
       </div>
     </form>

@@ -14,27 +14,12 @@ from django.views.generic import (
 )
 
 from acesso.permissions import EditaInventarioRequiredMixin
-from auditoria.services import registrar_criacao, registrar_edicao, registrar_relacao, snapshot
+from auditoria.services import (
+    registrar_criacao, registrar_edicao, registrar_relacao, snapshot, snapshot_relacoes,
+)
 
 from .forms import CadasturItemFormSet, ContatoItemFormSet, DadosComplementaresForm, ItemInventarioForm
 from .models import ItemInventario, Participa, Segmento, StatusItem
-
-
-def _resumo_complementos(item):
-    return {
-        "campos de segmento": "; ".join(sorted(
-            f"{p.campo.nome}: {p.valor}" for p in item.preenchimentos.select_related("campo")
-        )),
-        "contatos": "; ".join(sorted(
-            f"{c.tipo}: {c.valor} ({c.finalidade})" for c in item.contato_set.all()
-        )),
-        "Cadastur": "; ".join(sorted(
-            f"{c.numero}: {c.tipo}, {c.situacao}, {c.vencimento or ''}"
-            for c in item.cadastur_set.all()
-        )),
-        "CNAE": "; ".join(sorted(item.atividades.values_list("codigo", flat=True))),
-        "profissionais": "; ".join(sorted(item.profissionais.values_list("nome", flat=True))),
-    }
 
 
 class ItemListView(LoginRequiredMixin, ListView):
@@ -208,11 +193,11 @@ class DadosComplementaresView(EditaInventarioRequiredMixin, View):
         if not all((form.is_valid(), contatos.is_valid(), cadastur.is_valid())):
             return self._render(request, item, form, contatos, cadastur)
         with transaction.atomic():
-            anterior = _resumo_complementos(item)
+            anterior = snapshot_relacoes(item)
             form.save()
             contatos.save()
             cadastur.save()
-            atual = _resumo_complementos(item)
+            atual = snapshot_relacoes(item)
             for campo in anterior:
                 registrar_relacao(item, campo, anterior[campo], atual[campo], usuario=request.user)
         messages.success(request, "Dados complementares atualizados.")

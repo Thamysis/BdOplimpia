@@ -23,6 +23,7 @@
     </tbody></table></div>
 </div>
 <div class="d-flex gap-2">
+  <a class="btn btn-outline-primary" href="{% url 'importacao:detalhe' importacao.pk %}">Ver carga e inconsistências</a>
   <a class="btn btn-primary" href="{% url 'importacao:importar_oficial' %}"><i class="bi bi-upload"></i> Importar outra aba</a>
   <a class="btn btn-outline-primary" href="{% url 'inventario:lista' %}">Ver Inventário</a>
 </div>

@@ -115,6 +115,31 @@ class ImportacaoXLSXTests(TestCase):
         self.assertEqual(ItemInventario.objects.filter(nome="Hotel XLSX A").count(), 1)
 
 
+class ImportacaoODSTests(TestCase):
+    def test_le_ods_com_texto_e_importa_item(self):
+        import io
+
+        from odf.opendocument import OpenDocumentSpreadsheet
+        from odf.table import Table, TableCell, TableRow
+        from odf.text import P
+
+        doc = OpenDocumentSpreadsheet()
+        tabela = Table(name="Inventário")
+        for valores in (("nome", "bairro"), ("Hotel ODS", "Centro")):
+            linha = TableRow()
+            for valor in valores:
+                celula = TableCell()
+                celula.addElement(P(text=valor))
+                linha.addElement(celula)
+            tabela.addElement(linha)
+        doc.spreadsheet.addElement(tabela)
+        arquivo = io.BytesIO()
+        doc.save(arquivo)
+        carga = services.importar(arquivo.getvalue(), "inventario.ods")
+        self.assertEqual(carga.qtd_importados, 1)
+        self.assertEqual(ItemInventario.objects.get().bairro, "Centro")
+
+
 class PreviaImportacaoFluxoTests(TestCase):
     """Fluxo de prévia -> confirmação via views (BDP01)."""
 

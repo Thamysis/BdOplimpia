@@ -12,6 +12,7 @@ from .models import FonteDados, Importacao
 from .services import ArquivoNaoSuportado
 
 SESSAO_CHAVE = "importacao_preview"
+SESSAO_OFICIAL_CHAVE = "importacao_oficial_preview"
 
 
 class ImportacaoView(ImportaRequiredMixin, FormView):
@@ -86,7 +87,7 @@ class ImportacaoCancelarView(ImportaRequiredMixin, View):
 
 
 class ImportacaoOficialView(ImportaRequiredMixin, FormView):
-    """Importa uma aba da planilha oficial INVENTARIO OFICIAL OLIMPIA (um segmento)."""
+    """Gera prévia de todas as abas reconhecidas da planilha oficial."""
 
     template_name = "importacao/importar_oficial.html"
     form_class = ImportacaoOficialForm
@@ -94,24 +95,46 @@ class ImportacaoOficialView(ImportaRequiredMixin, FormView):
     def form_valid(self, form):
         arquivo = form.cleaned_data["arquivo"]
         segmento = form.cleaned_data["segmento"].strip()
+        conteudo = arquivo.read()
         try:
-            registros, resumo = oficial.importar_arquivo(
-                arquivo.read(), arquivo.name, segmento, usuario=self.request.user
-            )
-        except (ArquivoNaoSuportado, UnicodeDecodeError, Exception) as exc:
+            previa = oficial.preparar(conteudo, arquivo.name, segmento)
+        except (ArquivoNaoSuportado, UnicodeDecodeError, ValueError, Exception) as exc:
             form.add_error("arquivo", f"Não foi possível processar: {exc}")
             return self.form_invalid(form)
-
-        messages.success(
-            self.request,
-            f"Planilha oficial processada ({segmento}): {resumo['criados']} criados, "
-            f"{resumo['atualizados']} atualizados, {resumo['ignorados']} ignorados.",
-        )
+        self.request.session[SESSAO_OFICIAL_CHAVE] = {
+            "conteudo_b64": base64.b64encode(conteudo).decode("ascii"),
+            "nome": arquivo.name, "segmento": segmento,
+        }
         return render(
             self.request,
-            "importacao/resultado_oficial.html",
-            {"segmento": segmento, "resumo": resumo, "registros": registros},
+            "importacao/previa_oficial.html",
+            {"previa": previa, "nome_arquivo": arquivo.name},
         )
+
+
+class ImportacaoOficialConfirmarView(ImportaRequiredMixin, View):
+    def post(self, request):
+        dados = request.session.get(SESSAO_OFICIAL_CHAVE)
+        if not dados:
+            messages.error(request, "Nenhuma prévia oficial pendente.")
+            return redirect("importacao:importar_oficial")
+        conteudo = base64.b64decode(dados["conteudo_b64"])
+        previa = oficial.preparar(conteudo, dados["nome"], dados["segmento"])
+        carga, resumo = oficial.confirmar_previa(previa, dados["nome"], usuario=request.user)
+        request.session.pop(SESSAO_OFICIAL_CHAVE, None)
+        messages.success(request, "Importação oficial concluída.")
+        return render(request, "importacao/resultado_oficial.html", {
+            "segmento": ", ".join(previa.abas), "resumo": resumo,
+            "registros": [registro for _, registro in previa.aceitas],
+            "importacao": carga,
+        })
+
+
+class ImportacaoOficialCancelarView(ImportaRequiredMixin, View):
+    def post(self, request):
+        request.session.pop(SESSAO_OFICIAL_CHAVE, None)
+        messages.info(request, "Prévia oficial descartada.")
+        return redirect("importacao:importar_oficial")
 
 
 class ImportacaoListView(ImportaRequiredMixin, ListView):

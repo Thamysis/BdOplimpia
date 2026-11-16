@@ -78,3 +78,24 @@ def registrar_relacao(item: ItemInventario, campo: str, anterior, atual, usuario
         usuario=usuario, item=item, acao=AcaoAuditoria.EDICAO,
         campo_alterado=campo, valor_anterior=str(anterior), valor_novo=str(atual),
     )
+
+
+def snapshot_relacoes(item: ItemInventario) -> dict[str, str]:
+    """Resumo estável das relações exibidas no detalhe do item."""
+    return {
+        "segmentos": "; ".join(sorted(
+            item.segmentos.values_list("nome", flat=True)
+        )),
+        "campos de segmento": "; ".join(sorted(
+            f"{p.campo.nome}: {p.valor}" for p in item.preenchimentos.select_related("campo")
+        )),
+        "contatos": "; ".join(sorted(
+            f"{c.tipo}: {c.valor} ({c.finalidade})" for c in item.contato_set.all()
+        )),
+        "Cadastur": "; ".join(sorted(
+            f"{c.numero}: {c.tipo}, {c.situacao}, {c.vencimento or ''}"
+            for c in item.cadastur_set.all()
+        )),
+        "CNAE": "; ".join(sorted(item.atividades.values_list("codigo", flat=True))),
+        "profissionais": "; ".join(sorted(item.profissionais.values_list("nome", flat=True))),
+    }

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Prévia da planilha oficial — OTO{% endblock %}
+{% block cabecalho %}Prévia da importação oficial{% endblock %}
+{% block nav_importacao %}ativo{% endblock %}
+{% block conteudo %}
+<p>Arquivo: <strong>{{ nome_arquivo }}</strong></p>
+<p>Abas reconhecidas: {{ previa.abas|join:", " }}.</p>
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="card p-3">Registros lidos: <strong>{{ previa.total_lidos }}</strong></div></div>
+  <div class="col-md-4"><div class="card p-3">Aceitos: <strong>{{ previa.aceitas|length }}</strong></div></div>
+  <div class="col-md-4"><div class="card p-3">Rejeitados: <strong>{{ previa.rejeitadas|length }}</strong></div></div>
+</div>
+<p class="text-muted">Nenhum item foi gravado. Confira as rejeições antes de confirmar.</p>
+{% if previa.rejeitadas %}
+<div class="card mb-3"><div class="card-header">Inconsistências</div><div class="table-responsive">
+  <table class="table table-sm mb-0"><thead><tr><th>Referência</th><th>Tipo</th><th>Motivo</th></tr></thead><tbody>
+  {% for erro in previa.rejeitadas %}<tr><td>{{ erro.referencia }}</td><td>{{ erro.tipo }}</td><td>{{ erro.motivo }}</td></tr>{% endfor %}
+  </tbody></table>
+</div></div>
+{% endif %}
+<div class="d-flex gap-2">
+  <form method="post" action="{% url 'importacao:confirmar_oficial' %}">{% csrf_token %}
+    <button class="btn btn-primary" type="submit">Confirmar importação</button></form>
+  <form method="post" action="{% url 'importacao:cancelar_oficial' %}">{% csrf_token %}
+    <button class="btn btn-outline-secondary" type="submit">Cancelar</button></form>
+</div>
+{% endblock %}

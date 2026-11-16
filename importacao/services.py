@@ -133,24 +133,40 @@ def _ler_xlsx(conteudo: bytes) -> list[dict]:
     return linhas
 
 
-def _ler_ods(conteudo: bytes) -> list[dict]:  # pragma: no cover - opcional
+def ler_tabelas_ods(conteudo: bytes):
+    """Lê as abas ODS preservando o texto e células repetidas do formato."""
     try:
         from odf.opendocument import load
         from odf.table import Table, TableRow, TableCell
-        from odf.text import P
+        from odf.teletype import extractText
     except ImportError as exc:
         raise ArquivoNaoSuportado(
             "Leitura de ODS requer o pacote odfpy. Use CSV ou instale odfpy."
         ) from exc
     doc = load(io.BytesIO(conteudo))
-    tabela = doc.spreadsheet.getElementsByType(Table)[0]
-    linhas_raw = []
-    for row in tabela.getElementsByType(TableRow):
-        celulas = []
-        for cell in row.getElementsByType(TableCell):
-            textos = cell.getElementsByType(P)
-            celulas.append("".join(str(t) for t in textos).strip())
-        linhas_raw.append(celulas)
+    for tabela in doc.spreadsheet.getElementsByType(Table):
+        linhas = []
+        for row in tabela.getElementsByType(TableRow):
+            celulas = []
+            for cell in row.getElementsByType(TableCell):
+                valor = extractText(cell).strip()
+                repeticoes = int(cell.getAttribute("numbercolumnsrepeated") or 1)
+                celulas.extend([valor] * min(repeticoes, 1000))
+            while celulas and not celulas[-1]:
+                celulas.pop()
+            repeticoes = int(row.getAttribute("numberrowsrepeated") or 1)
+            if celulas:
+                linhas.extend([celulas] * min(repeticoes, 1000))
+            elif linhas:
+                linhas.append([])
+        yield tabela.getAttribute("name") or "", linhas
+
+
+def _ler_ods(conteudo: bytes) -> list[dict]:
+    tabelas = list(ler_tabelas_ods(conteudo))
+    if not tabelas:
+        return []
+    _, linhas_raw = tabelas[0]
     if not linhas_raw:
         return []
     cabecalho = [_normaliza_cabecalho(c) for c in linhas_raw[0]]

@@ -1,5 +1,10 @@
 """Testes do importador do formato oficial (INVENTARIO OFICIAL OLIMPIA)."""
 from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
+
+from .models import Importacao, InconsistenciaImportacao
+from auditoria.models import AlteracaoInventario
 
 from inventario.models import (
     Cadastur,
@@ -88,6 +93,31 @@ class PersistenciaOficialTests(TestCase):
         self.assertEqual(resumo2["criados"], 0)
         self.assertEqual(ItemInventario.objects.count(), 2)
 
+    def test_atualizacao_oficial_registra_campos_e_vinculos_no_historico(self):
+        item = ItemInventario.objects.create(nome="Hotel Thermas")
+        registros = oficial.interpretar(MATRIZ, "Meios de Hospedagem")[:1]
+        resumo = oficial.persistir(registros, "Meios de Hospedagem")
+        self.assertEqual(resumo["atualizados"], 1)
+        item.refresh_from_db()
+        self.assertEqual(item.bairro, "Centro")
+        self.assertTrue(AlteracaoInventario.objects.filter(item=item, campo_alterado="bairro").exists())
+        self.assertTrue(AlteracaoInventario.objects.filter(item=item, campo_alterado="segmentos").exists())
+
+
+class LinhasDeResumoTests(TestCase):
+    def test_classificacoes_e_totais_nao_viram_estabelecimentos(self):
+        matriz = [
+            ["INVENTÁRIO"],
+            ["QTD", "NOME FANTASIA", "ENDEREÇO", "CLASSIFICAÇÃO", "QTDE"],
+            ["", "BAR E LANCHONETE", "", "", "0"],
+            ["", "", "", "TOTAL DE EMPRESAS", "0"],
+            ["1", "Hotel válido", "Rua A", "", ""],
+        ]
+        previa = oficial.PreviaOficial()
+        registros = oficial.interpretar(matriz, "Hospedagem", previa.rejeitadas)
+        self.assertEqual([r.base["nome"] for r in registros], ["Hotel válido"])
+        self.assertEqual(previa.rejeitadas, [])
+
 
 class FiltroLinhasTotalTests(TestCase):
     """Linhas agregadas (TOTAL / TOTAIS DE…) não viram itens."""
@@ -138,12 +168,14 @@ class ImportacaoOficialViewTests(TestCase):
         self.arquivo = SimpleUploadedFile("mh.csv", csv, content_type="text/csv")
 
     def test_importa_aba_oficial(self):
-        from django.urls import reverse
-
         resp = self.client.post(
             reverse("importacao:importar_oficial"),
             {"segmento": "Meios de Hospedagem", "arquivo": self.arquivo},
         )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "importacao/previa_oficial.html")
+        self.assertEqual(ItemInventario.objects.count(), 0)
+        resp = self.client.post(reverse("importacao:confirmar_oficial"))
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "importacao/resultado_oficial.html")
         self.assertEqual(ItemInventario.objects.filter(nome="Hotel Central").count(), 1)
@@ -153,3 +185,42 @@ class ImportacaoOficialViewTests(TestCase):
                 item__nome="Hotel Central", segmento__nome="Meios de Hospedagem"
             ).exists()
         )
+        self.assertEqual(Importacao.objects.get().qtd_importados, 1)
+
+    def test_planilha_com_duas_abas_gera_previa_e_registra_rejeicoes(self):
+        from io import BytesIO
+        from openpyxl import Workbook
+
+        wb = Workbook()
+        controle = wb.active
+        controle.title = "CONTROLE"
+        controle.append(["Controle da planilha"])
+        for titulo, nome in (("HOSPEDAGEM", "Hotel A"), ("ALIMENTAÇÃO", "Restaurante B")):
+            ws = wb.create_sheet(titulo)
+            ws.append(["INVENTÁRIO"])
+            ws.append(["QTD", "NOME FANTASIA", "ENDEREÇO"])
+            ws.append([1, nome, "Rua A"])
+        ws.append([2, "Restaurante B", "Rua B"])
+        ws.append([3, "", "Rua sem nome"])
+        conteudo = BytesIO()
+        wb.save(conteudo)
+        arquivo = SimpleUploadedFile("inventario.xlsx", conteudo.getvalue())
+
+        resp = self.client.post(reverse("importacao:importar_oficial"), {"arquivo": arquivo})
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.context["previa"].abas, ["HOSPEDAGEM", "ALIMENTAÇÃO"])
+        self.assertEqual(resp.context["previa"].total_lidos, 4)
+        self.assertEqual(len(resp.context["previa"].rejeitadas), 2)
+        self.assertEqual(ItemInventario.objects.count(), 0)
+        self.client.post(reverse("importacao:confirmar_oficial"))
+        self.assertEqual(ItemInventario.objects.count(), 2)
+        self.assertEqual(Importacao.objects.get().qtd_rejeitados, 2)
+        self.assertEqual(InconsistenciaImportacao.objects.count(), 2)
+
+    def test_cancelar_previa_oficial_nao_grava(self):
+        self.client.post(reverse("importacao:importar_oficial"), {
+            "segmento": "Meios de Hospedagem", "arquivo": self.arquivo,
+        })
+        self.assertEqual(self.client.post(reverse("importacao:cancelar_oficial")).status_code, 302)
+        self.assertEqual(self.client.post(reverse("importacao:confirmar_oficial")).status_code, 302)
+        self.assertEqual(ItemInventario.objects.count(), 0)

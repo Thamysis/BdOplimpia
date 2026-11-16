@@ -26,7 +26,7 @@ class ImportacaoOficialForm(forms.Form):
     """Importa uma aba de categoria da planilha oficial (um segmento)."""
 
     segmento = forms.CharField(
-        label="Categoria/Segmento (nome da aba)",
+        required=False, label="Categoria/Segmento (opcional para importar todas as abas)",
         widget=forms.TextInput(attrs={"class": "campo", "placeholder": "Ex.: Meios de Hospedagem"}),
     )
     arquivo = forms.FileField(

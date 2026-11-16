@@ -22,7 +22,8 @@ alterações, controle de acesso por perfil e um módulo complementar de indicad
   valores anterior e novo) — RN03 / RF15.
 - **importacao** — importação e validação do Inventário (CSV/XLSX/ODS), com
   classificação de registros válidos/duplicados/inválidos e registro de
-  inconsistências — BDP01, BDP11.
+  inconsistências; a planilha oficial pode ser enviada com várias abas, com
+  prévia antes da confirmação — BDP01, BDP11.
 - **ods** — módulo complementar: indicadores, dados de pesquisa, regras de cálculo
   documentadas e histórico de medições — BDP08, BDP09, BDP10, BDP12.
 
@@ -67,13 +68,19 @@ Senha para todas: `demo12345`
 
 ### Formato de importação
 
-Arquivo CSV (vírgula ou ponto e vírgula), XLSX ou ODS. Coluna **`nome`** é obrigatória;
+Na importação genérica, use CSV (vírgula ou ponto e vírgula), XLSX ou ODS.
+Coluna **`nome`** é obrigatória;
 colunas opcionais: `razao_social, tipo_documento, documento, endereco, bairro,
 latitude, longitude`. Linhas duplicadas (mesmo nome) ou sem campo obrigatório são
 rejeitadas com o motivo; coordenadas fora das faixas válidas também. O envio gera
 primeiro uma **prévia** com cada linha classificada como aceita ou rejeitada; nada é
 gravado até a confirmação (BDP01), e a conferência de integridade/inconsistências
 corresponde ao BDP11.
+
+Para a planilha oficial, acesse `/importacao/oficial/`. Envie o XLSX/ODS completo
+para reconhecer as abas de categoria, ou informe um segmento ao enviar CSV.
+Confira a prévia e as rejeições antes de confirmar. A carga e as inconsistências
+ficam registradas no histórico de importações.
 
 ## Banco de dados
 
