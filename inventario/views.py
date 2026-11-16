@@ -117,18 +117,15 @@ class ItemUpdateView(EditaInventarioRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         anterior = snapshot(self.get_object())
-        segmentos_antes = ", ".join(sorted(
-            Segmento.objects.filter(participa__item=self.object).values_list("nome", flat=True)
-        ))
+        relacoes_antes = snapshot_relacoes(self.object)
         response = super().form_valid(form)
         registrar_edicao(self.object, anterior, usuario=self.request.user)
-        segmentos_depois = ", ".join(sorted(
-            Segmento.objects.filter(participa__item=self.object).values_list("nome", flat=True)
-        ))
-        registrar_relacao(
-            self.object, "segmentos", segmentos_antes, segmentos_depois,
-            usuario=self.request.user,
-        )
+        relacoes_depois = snapshot_relacoes(self.object)
+        for campo in ("segmentos", "campos de segmento"):
+            registrar_relacao(
+                self.object, campo, relacoes_antes[campo], relacoes_depois[campo],
+                usuario=self.request.user,
+            )
         messages.success(self.request, "Item atualizado com sucesso.")
         return response
 

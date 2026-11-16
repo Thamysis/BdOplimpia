@@ -84,6 +84,8 @@ class EdicaoItemTests(BaseInventarioTests):
     def test_alteracao_de_segmentos_e_auditada(self):
         item = ItemInventario.objects.create(nome="Hotel")
         Participa.objects.create(item=item, segmento=self.hospedagem)
+        campo = CampoSegmento.objects.create(segmento=self.hospedagem, nome="Leitos")
+        Preenchimento.objects.create(item=item, campo=campo, valor="20")
         resposta = self.client.post(reverse("inventario:editar", args=[item.pk]), {
             "nome": "Hotel", "segmentos": [self.alimentacao.pk],
         })
@@ -91,6 +93,10 @@ class EdicaoItemTests(BaseInventarioTests):
         registro = AlteracaoInventario.objects.get(item=item, campo_alterado="segmentos")
         self.assertIn("Hospedagem", registro.valor_anterior)
         self.assertIn("Alimentação", registro.valor_novo)
+        self.assertFalse(Preenchimento.objects.filter(item=item, campo=campo).exists())
+        self.assertTrue(AlteracaoInventario.objects.filter(
+            item=item, campo_alterado="campos de segmento"
+        ).exists())
 
 
 class DadosComplementaresTests(BaseInventarioTests):
