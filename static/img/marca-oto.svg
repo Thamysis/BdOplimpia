@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="titulo">
+  <title id="titulo">Marca do Observatório de Turismo de Olímpia</title>
+  <rect width="64" height="64" rx="16" fill="#123b4a"/>
+  <path d="M32 10c-11 0-20 8.7-20 19.5C12 43 32 56 32 56s20-13 20-26.5C52 18.7 43 10 32 10Z" fill="#e9f4f1"/>
+  <circle cx="32" cy="28" r="11" fill="#0c746f"/>
+  <path d="M22 30c4-3 7-3 10 0s6 3 10 0" fill="none" stroke="#e9f4f1" stroke-linecap="round" stroke-width="3"/>
+  <circle cx="39" cy="22" r="2.5" fill="#d59b35"/>
+</svg>

@@ -65,3 +65,9 @@ class AutenticacaoTests(TestCase):
             "inativo", password="x", perfil=Perfil.OPERADOR, ativo=False
         )
         self.assertFalse(self.client.login(username="inativo", password="x"))
+
+    def test_login_exibe_marca_e_icone_da_aba(self):
+        resposta = self.client.get(reverse("acesso:login"))
+        self.assertContains(resposta, "Entrar — OTO")
+        self.assertContains(resposta, 'rel="icon"')
+        self.assertContains(resposta, "img/marca-oto.svg")
