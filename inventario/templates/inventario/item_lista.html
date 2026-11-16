@@ -31,7 +31,7 @@
       <div class="col-md-2">
         <label class="form-label" for="status">Status</label>
         <select id="status" name="status" class="form-select">
-          <option value="">Todos (ativos)</option>
+          <option value="">Ativos (padrão)</option>
           {% for valor, rotulo in status_choices %}
           <option value="{{ valor }}" {% if filtros.status == valor %}selected{% endif %}>{{ rotulo }}</option>
           {% endfor %}
@@ -46,6 +46,7 @@
           <input class="form-check-input" type="checkbox" id="incluir_inativos" name="incluir_inativos" value="1" {% if filtros.incluir_inativos %}checked{% endif %}>
           <label class="form-check-label" for="incluir_inativos">Incluir itens inativos</label>
         </div>
+        <div class="form-text"><i class="bi bi-info-circle" aria-hidden="true"></i> A lista mostra apenas itens ativos por padrão. Use o filtro de status para ver somente os inativos ou marque esta opção para ver todos.</div>
       </div>
     </form>
   </div>
@@ -76,12 +77,12 @@
 </div>
 
 {% if is_paginated %}
-<nav class="mt-3"><ul class="pagination justify-content-center">
+<nav class="mt-3" aria-label="Páginas do Inventário"><ul class="pagination justify-content-center">
   <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
-    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+    {% if page_obj.has_previous %}<a class="page-link" href="?{% if parametros_paginacao %}{{ parametros_paginacao }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>{% else %}<span class="page-link">Anterior</span>{% endif %}</li>
   <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
   <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
-    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a></li>
+    {% if page_obj.has_next %}<a class="page-link" href="?{% if parametros_paginacao %}{{ parametros_paginacao }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Próxima</a>{% else %}<span class="page-link">Próxima</span>{% endif %}</li>
 </ul></nav>
 {% endif %}
 {% endblock %}

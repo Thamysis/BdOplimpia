@@ -33,8 +33,11 @@ class ItemListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = ItemInventario.objects.all()
+        status = self.request.GET.get("status", "").strip()
         incluir_inativos = self.request.GET.get("incluir_inativos") == "1"
-        if not incluir_inativos:
+        if status in (StatusItem.ATIVO, StatusItem.INATIVO):
+            qs = qs.filter(status=status)
+        elif not incluir_inativos:
             qs = qs.filter(status=StatusItem.ATIVO)
 
         nome = self.request.GET.get("nome", "").strip()
@@ -44,10 +47,6 @@ class ItemListView(LoginRequiredMixin, ListView):
         segmento_id = self.request.GET.get("segmento", "").strip()
         if segmento_id:
             qs = qs.filter(participa__segmento_id=segmento_id)
-
-        status = self.request.GET.get("status", "").strip()
-        if status in (StatusItem.ATIVO, StatusItem.INATIVO):
-            qs = qs.filter(status=status)
 
         return qs.distinct()
 
@@ -61,6 +60,9 @@ class ItemListView(LoginRequiredMixin, ListView):
             "incluir_inativos": self.request.GET.get("incluir_inativos", ""),
         }
         ctx["status_choices"] = StatusItem.choices
+        parametros = self.request.GET.copy()
+        parametros.pop("page", None)
+        ctx["parametros_paginacao"] = parametros.urlencode()
         return ctx
 
 

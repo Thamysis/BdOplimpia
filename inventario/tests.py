@@ -176,6 +176,20 @@ class ConsultaFiltroTests(BaseInventarioTests):
         resp = self.client.get(reverse("inventario:lista"))
         self.assertEqual(resp.context["itens"].count(), 3)
 
+    def test_paginacao_preserva_filtros(self):
+        ItemInventario.objects.bulk_create(
+            ItemInventario(nome=f"Hotel {numero}") for numero in range(21)
+        )
+        resposta = self.client.get(reverse("inventario:lista"), {"nome": "Hotel", "page": "2"})
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, "?nome=Hotel&amp;page=1")
+        self.assertNotContains(resposta, 'href="?page=1"')
+
+    def test_status_inativo_funciona_sem_marcar_incluir_inativos(self):
+        inativo = ItemInventario.objects.create(nome="Hotel fechado", status=StatusItem.INATIVO)
+        resposta = self.client.get(reverse("inventario:lista"), {"status": StatusItem.INATIVO})
+        self.assertEqual(list(resposta.context["itens"]), [inativo])
+
 
 class InativacaoTests(BaseInventarioTests):
     """BDP05 — soft delete preservando histórico."""

@@ -11,7 +11,14 @@
       <div class="row">
         {% for campo in form %}
         <div class="{% if campo.name == 'segmentos' %}col-12{% else %}col-md-6{% endif %}">
-          {% include "_campo.html" with campo=campo %}
+          {% if campo.name == 'segmentos' %}
+            <fieldset class="mb-3">
+              <legend class="form-label fs-6 mb-1">Segmentos</legend>
+              <p class="form-text mt-0"><i class="bi bi-info-circle" aria-hidden="true"></i> Os campos específicos ficam disponíveis em “Dados complementares” após salvar o item.</p>
+              {{ campo }}
+              {% for erro in campo.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+            </fieldset>
+          {% else %}{% include "_campo.html" with campo=campo %}{% endif %}
         </div>
         {% endfor %}
       </div>
