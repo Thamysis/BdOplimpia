@@ -272,17 +272,22 @@ class RelatoriosView(LoginRequiredMixin, TemplateView):
         max_segmento = max([s.total for s in por_segmento], default=0)
         for s in por_segmento:
             s.percentual = (s.total / max_segmento * 100) if max_segmento else 0
+            s.percentual_css = f"{s.percentual:.2f}"
 
         # Itens sem nenhum segmento vinculado.
         sem_segmento = ItemInventario.objects.filter(participa__isnull=True).count()
 
+        pct_ativos = (ativos / total * 100) if total else 0
+        pct_inativos = (inativos / total * 100) if total else 0
         ctx.update(
             {
                 "total": total,
                 "ativos": ativos,
                 "inativos": inativos,
-                "pct_ativos": (ativos / total * 100) if total else 0,
-                "pct_inativos": (inativos / total * 100) if total else 0,
+                "pct_ativos": pct_ativos,
+                "pct_inativos": pct_inativos,
+                "pct_ativos_css": f"{pct_ativos:.2f}",
+                "pct_inativos_css": f"{pct_inativos:.2f}",
                 "por_segmento": por_segmento,
                 "sem_segmento": sem_segmento,
             }

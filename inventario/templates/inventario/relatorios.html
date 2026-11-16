@@ -20,8 +20,8 @@
   <div class="card-body">
     {% if total %}
     <div class="oto-barra-status mb-2">
-      <div class="ativo" style="width: {{ pct_ativos|floatformat:2 }}%">{% if pct_ativos >= 12 %}Ativos {{ pct_ativos|floatformat:0 }}%{% endif %}</div>
-      <div class="inativo" style="width: {{ pct_inativos|floatformat:2 }}%">{% if pct_inativos >= 12 %}Inativos {{ pct_inativos|floatformat:0 }}%{% endif %}</div>
+      <div class="ativo" style="width: {{ pct_ativos_css }}%">{% if pct_ativos >= 12 %}Ativos {{ pct_ativos|floatformat:1 }}%{% endif %}</div>
+      <div class="inativo" style="width: {{ pct_inativos_css }}%">{% if pct_inativos >= 12 %}Inativos {{ pct_inativos|floatformat:1 }}%{% endif %}</div>
     </div>
     <div class="d-flex gap-3 small text-muted">
       <span><span class="badge badge-ativo">&nbsp;</span> Ativos: {{ ativos }}</span>
@@ -41,7 +41,7 @@
         <tr>
           <th scope="row" style="width:220px">{{ s.nome }}</th>
           <td>
-            <div class="trilha"><div class="barra" style="width: {{ s.percentual|floatformat:2 }}%"></div></div>
+            <div class="trilha"><div class="barra" style="width: {{ s.percentual_css }}%"></div></div>
           </td>
           <td class="text-end" style="width:140px">{{ s.total }} <small class="text-muted">({{ s.ativos }} ativos)</small></td>
         </tr>

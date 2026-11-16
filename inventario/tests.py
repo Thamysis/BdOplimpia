@@ -269,6 +269,9 @@ class RelatoriosTests(BaseInventarioTests):
         self.assertEqual(por_seg["Hospedagem"].ativos, 2)
         self.assertEqual(por_seg["Alimentação"].total, 1)
         self.assertEqual(por_seg["Alimentação"].ativos, 0)
+        self.assertContains(resp, 'style="width: 66.67%"')
+        self.assertContains(resp, 'style="width: 33.33%"')
+        self.assertContains(resp, 'style="width: 50.00%"')
 
     def test_relatorios_exige_login(self):
         self.client.logout()
