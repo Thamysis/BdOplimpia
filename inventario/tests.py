@@ -272,7 +272,21 @@ class GerenciaAcessoTests(TestCase):
         )
 
         self.assertEqual(resposta.status_code, 404)
+        
+    def test_usuario_com_gerencia_nao_reativa_outro_item(self):
+        self.item_outro.status = StatusItem.INATIVO
+        self.item_outro.save()
 
+        self.client.login(username="empresa", password="x")
+
+        resposta = self.client.post(
+            reverse("inventario:reativar", args=[self.item_outro.pk])
+        )
+
+        self.assertEqual(resposta.status_code, 404)
+
+        self.item_outro.refresh_from_db()
+        self.assertEqual(self.item_outro.status, StatusItem.INATIVO)
 
 class InativacaoTests(BaseInventarioTests):
     """BDP05 — soft delete preservando histórico."""
