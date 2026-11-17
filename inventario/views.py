@@ -279,28 +279,35 @@ class RelatoriosView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
 
-        total = ItemInventario.objects.count()
-        ativos = ItemInventario.objects.filter(status=StatusItem.ATIVO).count()
-        inativos = ItemInventario.objects.filter(status=StatusItem.INATIVO).count()
+        itens = itens_acessiveis_por(self.request.user)
+
+        total = itens.count()
+        ativos = itens.filter(status=StatusItem.ATIVO).count()
+        inativos = itens.filter(status=StatusItem.INATIVO).count()
 
         # Itens por segmento (ativos e inativos), ordenado pelo total.
         por_segmento = list(
             Segmento.objects.annotate(
-                total=Count("participa__item", distinct=True),
-                ativos=Count(
+                total=Count(
                     "participa__item",
-                    filter=Q(participa__item__status=StatusItem.ATIVO),
+                    filter=Q(participa__item__in=itens),
                     distinct=True,
                 ),
-            ).order_by("-total", "nome")
+                ativos=Count(
+                    "participa__item",
+                    filter=Q(
+                        participa__item__in=itens,
+                        participa__item__status=StatusItem.ATIVO,
+                    ),
+                    distinct=True,
+                ),
+            )
+            .filter(total__gt=0)
+            .order_by("-total", "nome")
         )
-        max_segmento = max([s.total for s in por_segmento], default=0)
-        for s in por_segmento:
-            s.percentual = (s.total / max_segmento * 100) if max_segmento else 0
-            s.percentual_css = f"{s.percentual:.2f}"
 
         # Itens sem nenhum segmento vinculado.
-        sem_segmento = ItemInventario.objects.filter(participa__isnull=True).count()
+        sem_segmento = itens.filter(participa__isnull=True).count()
 
         pct_ativos = (ativos / total * 100) if total else 0
         pct_inativos = (inativos / total * 100) if total else 0
