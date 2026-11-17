@@ -305,6 +305,11 @@ class RelatoriosView(LoginRequiredMixin, TemplateView):
             .filter(total__gt=0)
             .order_by("-total", "nome")
         )
+        max_segmento = max([s.total for s in por_segmento], default=0)
+
+        for s in por_segmento:
+            s.percentual = (s.total / max_segmento * 100) if max_segmento else 0
+            s.percentual_css = f"{s.percentual:.2f}"
 
         # Itens sem nenhum segmento vinculado.
         sem_segmento = itens.filter(participa__isnull=True).count()
