@@ -23,6 +23,14 @@ from .models import (
     CampoSegmento, Cnae, ItemInventario, Participa, ProfissionalTurismo, Segmento, StatusItem,
 )
 
+def itens_acessiveis_por(usuario):
+    """Retorna os itens que o usuário pode acessar pelo escopo de Gerencia."""
+    qs = ItemInventario.objects.all()
+
+    if not usuario.eh_administrador and usuario.gerencias.exists():
+        qs = qs.filter(gerencias__usuario=usuario)
+
+    return qs.distinct()
 
 class ItemListView(LoginRequiredMixin, ListView):
     """BDP04 — consulta e filtro. Lista apenas itens ativos por padrão."""
@@ -32,7 +40,7 @@ class ItemListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = ItemInventario.objects.all()
+        qs = itens_acessiveis_por(self.request.user)
         status = self.request.GET.get("status", "").strip()
         incluir_inativos = self.request.GET.get("incluir_inativos") == "1"
         if status in (StatusItem.ATIVO, StatusItem.INATIVO):
@@ -70,6 +78,9 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
     model = ItemInventario
     template_name = "inventario/item_detalhe.html"
     context_object_name = "item"
+
+    def get_queryset(self):
+        return itens_acessiveis_por(self.request.user)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -138,13 +149,18 @@ class ItemUpdateView(EditaInventarioRequiredMixin, UpdateView):
         ctx = super().get_context_data(**kwargs)
         ctx["titulo"] = "Editar item"
         return ctx
-
+    
+    def get_queryset(self):
+        return itens_acessiveis_por(self.request.user)
 
 class ItemInativarView(EditaInventarioRequiredMixin, View):
     """BDP05 — inativa (soft delete) preservando histórico e vínculos."""
 
     def post(self, request, pk):
-        item = get_object_or_404(ItemInventario, pk=pk)
+        item = get_object_or_404(
+            itens_acessiveis_por(request.user),
+            pk=pk,
+        )
         if item.status == StatusItem.ATIVO:
             anterior = snapshot(item)
             item.status = StatusItem.INATIVO
@@ -156,7 +172,10 @@ class ItemInativarView(EditaInventarioRequiredMixin, View):
 
 class ItemReativarView(EditaInventarioRequiredMixin, View):
     def post(self, request, pk):
-        item = get_object_or_404(ItemInventario, pk=pk)
+        item = get_object_or_404(
+            itens_acessiveis_por(request.user),
+            pk=pk,
+        )
         if item.status == StatusItem.INATIVO:
             anterior = snapshot(item)
             item.status = StatusItem.ATIVO
@@ -185,11 +204,17 @@ class DadosComplementaresView(EditaInventarioRequiredMixin, View):
         })
 
     def get(self, request, pk):
-        item = get_object_or_404(ItemInventario, pk=pk)
+        item = get_object_or_404(
+            itens_acessiveis_por(request.user),
+            pk=pk,
+        )
         return self._render(request, item, *self._formularios(item))
 
     def post(self, request, pk):
-        item = get_object_or_404(ItemInventario, pk=pk)
+        item = get_object_or_404(
+            itens_acessiveis_por(request.user),
+            pk=pk,
+        )
         form, contatos, cadastur = self._formularios(item, request.POST)
         if not all((form.is_valid(), contatos.is_valid(), cadastur.is_valid())):
             return self._render(request, item, form, contatos, cadastur)

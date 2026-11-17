@@ -192,6 +192,88 @@ class ConsultaFiltroTests(BaseInventarioTests):
         self.assertEqual(list(resposta.context["itens"]), [inativo])
 
 
+class GerenciaAcessoTests(TestCase):
+    def setUp(self):
+        self.operador = Usuario.objects.create_user(
+            "empresa", password="x", perfil=Perfil.OPERADOR
+        )
+        self.admin = Usuario.objects.create_user(
+            "admin-gerencia", password="x", perfil=Perfil.ADMINISTRADOR
+        )
+
+        self.item_permitido = ItemInventario.objects.create(
+            nome="Hotel Permitido"
+        )
+        self.item_outro = ItemInventario.objects.create(
+            nome="Hotel de Outra Empresa"
+        )
+
+        Gerencia.objects.create(
+            usuario=self.operador,
+            item=self.item_permitido,
+        )
+
+    def test_usuario_com_gerencia_lista_apenas_itens_vinculados(self):
+        self.client.login(username="empresa", password="x")
+
+        resposta = self.client.get(reverse("inventario:lista"))
+
+        itens = list(resposta.context["itens"])
+        self.assertIn(self.item_permitido, itens)
+        self.assertNotIn(self.item_outro, itens)
+
+    def test_admin_continua_vendo_todos_os_itens(self):
+        self.client.login(username="admin-gerencia", password="x")
+
+        resposta = self.client.get(reverse("inventario:lista"))
+
+        itens = list(resposta.context["itens"])
+        self.assertIn(self.item_permitido, itens)
+        self.assertIn(self.item_outro, itens)
+
+    def test_usuario_com_gerencia_nao_acessa_detalhe_de_outro_item(self):
+        self.client.login(username="empresa", password="x")
+
+        resposta = self.client.get(
+            reverse("inventario:detalhe", args=[self.item_outro.pk])
+        )
+
+        self.assertEqual(resposta.status_code, 404)
+
+    def test_usuario_com_gerencia_nao_edita_outro_item(self):
+        self.client.login(username="empresa", password="x")
+
+        resposta = self.client.get(
+            reverse("inventario:editar", args=[self.item_outro.pk])
+        )
+
+        self.assertEqual(resposta.status_code, 404)
+
+    def test_usuario_com_gerencia_nao_inativa_outro_item(self):
+        self.client.login(username="empresa", password="x")
+
+        resposta = self.client.post(
+            reverse("inventario:inativar", args=[self.item_outro.pk])
+        )
+
+        self.assertEqual(resposta.status_code, 404)
+
+        self.item_outro.refresh_from_db()
+        self.assertEqual(self.item_outro.status, StatusItem.ATIVO)
+
+    def test_usuario_com_gerencia_nao_acessa_dados_complementares_de_outro_item(self):
+        self.client.login(username="empresa", password="x")
+
+        resposta = self.client.get(
+            reverse(
+                "inventario:dados_complementares",
+                args=[self.item_outro.pk],
+            )
+        )
+
+        self.assertEqual(resposta.status_code, 404)
+
+
 class InativacaoTests(BaseInventarioTests):
     """BDP05 — soft delete preservando histórico."""
 
