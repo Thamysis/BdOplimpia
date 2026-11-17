@@ -23,6 +23,14 @@ from .models import (
     CampoSegmento, Cnae, ItemInventario, Participa, ProfissionalTurismo, Segmento, StatusItem,
 )
 
+def itens_acessiveis_por(usuario):
+    """Retorna os itens que o usuário pode acessar pelo escopo de Gerencia."""
+    qs = ItemInventario.objects.all()
+
+    if not usuario.eh_administrador and usuario.gerencias.exists():
+        qs = qs.filter(gerencias__usuario=usuario)
+
+    return qs.distinct()
 
 class ItemListView(LoginRequiredMixin, ListView):
     """BDP04 — consulta e filtro. Lista apenas itens ativos por padrão."""
@@ -32,7 +40,7 @@ class ItemListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = ItemInventario.objects.all()
+        qs = itens_acessiveis_por(self.request.user)
         status = self.request.GET.get("status", "").strip()
         incluir_inativos = self.request.GET.get("incluir_inativos") == "1"
         if status in (StatusItem.ATIVO, StatusItem.INATIVO):
@@ -70,6 +78,9 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
     model = ItemInventario
     template_name = "inventario/item_detalhe.html"
     context_object_name = "item"
+
+    def get_queryset(self):
+        return itens_acessiveis_por(self.request.user)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -138,13 +149,18 @@ class ItemUpdateView(EditaInventarioRequiredMixin, UpdateView):
         ctx = super().get_context_data(**kwargs)
         ctx["titulo"] = "Editar item"
         return ctx
-
+    
+    def get_queryset(self):
+        return itens_acessiveis_por(self.request.user)
 
 class ItemInativarView(EditaInventarioRequiredMixin, View):
     """BDP05 — inativa (soft delete) preservando histórico e vínculos."""
 
     def post(self, request, pk):
-        item = get_object_or_404(ItemInventario, pk=pk)
+        item = get_object_or_404(
+            itens_acessiveis_por(request.user),
+            pk=pk,
+        )
         if item.status == StatusItem.ATIVO:
             anterior = snapshot(item)
             item.status = StatusItem.INATIVO
@@ -156,7 +172,10 @@ class ItemInativarView(EditaInventarioRequiredMixin, View):
 
 class ItemReativarView(EditaInventarioRequiredMixin, View):
     def post(self, request, pk):
-        item = get_object_or_404(ItemInventario, pk=pk)
+        item = get_object_or_404(
+            itens_acessiveis_por(request.user),
+            pk=pk,
+        )
         if item.status == StatusItem.INATIVO:
             anterior = snapshot(item)
             item.status = StatusItem.ATIVO
@@ -185,11 +204,17 @@ class DadosComplementaresView(EditaInventarioRequiredMixin, View):
         })
 
     def get(self, request, pk):
-        item = get_object_or_404(ItemInventario, pk=pk)
+        item = get_object_or_404(
+            itens_acessiveis_por(request.user),
+            pk=pk,
+        )
         return self._render(request, item, *self._formularios(item))
 
     def post(self, request, pk):
-        item = get_object_or_404(ItemInventario, pk=pk)
+        item = get_object_or_404(
+            itens_acessiveis_por(request.user),
+            pk=pk,
+        )
         form, contatos, cadastur = self._formularios(item, request.POST)
         if not all((form.is_valid(), contatos.is_valid(), cadastur.is_valid())):
             return self._render(request, item, form, contatos, cadastur)
@@ -254,28 +279,40 @@ class RelatoriosView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
 
-        total = ItemInventario.objects.count()
-        ativos = ItemInventario.objects.filter(status=StatusItem.ATIVO).count()
-        inativos = ItemInventario.objects.filter(status=StatusItem.INATIVO).count()
+        itens = itens_acessiveis_por(self.request.user)
+
+        total = itens.count()
+        ativos = itens.filter(status=StatusItem.ATIVO).count()
+        inativos = itens.filter(status=StatusItem.INATIVO).count()
 
         # Itens por segmento (ativos e inativos), ordenado pelo total.
         por_segmento = list(
             Segmento.objects.annotate(
-                total=Count("participa__item", distinct=True),
-                ativos=Count(
+                total=Count(
                     "participa__item",
-                    filter=Q(participa__item__status=StatusItem.ATIVO),
+                    filter=Q(participa__item__in=itens),
                     distinct=True,
                 ),
-            ).order_by("-total", "nome")
+                ativos=Count(
+                    "participa__item",
+                    filter=Q(
+                        participa__item__in=itens,
+                        participa__item__status=StatusItem.ATIVO,
+                    ),
+                    distinct=True,
+                ),
+            )
+            .filter(total__gt=0)
+            .order_by("-total", "nome")
         )
         max_segmento = max([s.total for s in por_segmento], default=0)
+
         for s in por_segmento:
             s.percentual = (s.total / max_segmento * 100) if max_segmento else 0
             s.percentual_css = f"{s.percentual:.2f}"
 
         # Itens sem nenhum segmento vinculado.
-        sem_segmento = ItemInventario.objects.filter(participa__isnull=True).count()
+        sem_segmento = itens.filter(participa__isnull=True).count()
 
         pct_ativos = (ativos / total * 100) if total else 0
         pct_inativos = (inativos / total * 100) if total else 0
