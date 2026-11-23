@@ -327,6 +327,28 @@ class InativacaoTests(BaseInventarioTests):
         lista = self.client.get(reverse("inventario:lista"), {"incluir_inativos": "1"})
         self.assertIn(item, list(lista.context["itens"]))
 
+    def test_reativar_item_mantem_registro_e_registra_historico(self):
+        item = ItemInventario.objects.create(
+            nome="Hotel Inativo",
+            status=StatusItem.INATIVO,
+        )
+
+        self.client.post(reverse("inventario:reativar", args=[item.pk]))
+
+        item.refresh_from_db()
+
+        # O mesmo registro continua existindo e volta a ficar ativo.
+        self.assertTrue(ItemInventario.objects.filter(pk=item.pk).exists())
+        self.assertEqual(item.status, StatusItem.ATIVO)
+
+        # A reativação fica registrada no histórico.
+        registro = AlteracaoInventario.objects.get(
+            item=item,
+            acao=AcaoAuditoria.REATIVACAO,
+        )
+        self.assertEqual(registro.usuario, self.operador)
+        self.assertIsNotNone(registro.data_hora)
+
 
 class RestricoesModeloTests(TestCase):
     """Restrições de integridade do modelo lógico."""
