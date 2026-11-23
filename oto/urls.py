@@ -27,10 +27,39 @@ def painel(request):
     return render(request, "painel.html", contexto)
 
 
+# Equipe de desenvolvimento, curso e instituição exibidos na página de créditos.
+EQUIPE = [
+    ("Caio Delgado Pires", "caiopires@usp.br"),
+    (
+        "Estefano Rafael Malaquias Alves Nascimento",
+        "estefano.nascimento@usp.br",
+    ),
+    ("Pyerry Klyzlow Xavier", "xavier.pyerry@usp.br"),
+    ("Thamyres Santos Silva", "thamyres.santos.silva@usp.br"),
+    ("Enzo Vasconcellos Pagotto", "enzopagotto@usp.br"),
+]
+CURSO = "Bacharelado em Sistemas de Informação"
+INSTITUICAO = "USP — ICMC (Instituto de Ciências Matemáticas e de Computação)"
+ANO_DESENVOLVIMENTO = 2026
+
+
+@login_required
+def creditos(request):
+    """Créditos do projeto: equipe, curso, instituição e ano."""
+    contexto = {
+        "equipe": [{"nome": nome, "email": email} for nome, email in EQUIPE],
+        "curso": CURSO,
+        "instituicao": INSTITUICAO,
+        "ano": ANO_DESENVOLVIMENTO,
+    }
+    return render(request, "creditos.html", contexto)
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", health, name="health"),
     path("", painel, name="painel"),
+    path("creditos/", creditos, name="creditos"),
     path("acesso/", include("acesso.urls")),
     path("inventario/", include("inventario.urls")),
     path("importacao/", include("importacao.urls")),
