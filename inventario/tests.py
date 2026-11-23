@@ -395,3 +395,15 @@ class RelatoriosTests(BaseInventarioTests):
         self.client.logout()
         resp = self.client.get(reverse("inventario:relatorios"))
         self.assertEqual(resp.status_code, 302)
+
+    def test_relatorio_segmento_tem_link_para_listagem_filtrada(self):
+        item = ItemInventario.objects.create(nome="Hotel Link")
+        Participa.objects.create(item=item, segmento=self.hospedagem)
+
+        resp = self.client.get(reverse("inventario:relatorios"))
+
+        url = reverse("inventario:lista")
+        self.assertContains(
+            resp,
+            f'href="{url}?segmento={self.hospedagem.pk}"',
+        )

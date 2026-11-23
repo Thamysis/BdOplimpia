@@ -39,7 +39,11 @@
       <tbody>
         {% for s in por_segmento %}
         <tr>
-          <th scope="row" style="width:220px">{{ s.nome }}</th>
+          <th scope="row" style="width:220px">
+            <a href="{% url 'inventario:lista' %}?segmento={{ s.pk }}">
+              {{ s.nome }}
+            </a>
+          </th>
           <td>
             <div class="trilha"><div class="barra" style="width: {{ s.percentual_css }}%"></div></div>
           </td>
